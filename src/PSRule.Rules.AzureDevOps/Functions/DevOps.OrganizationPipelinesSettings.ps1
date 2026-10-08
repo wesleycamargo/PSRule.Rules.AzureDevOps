@@ -10,7 +10,8 @@
     The name of your Azure DevOps organization (e.g. 'contoso').
 
     .PARAMETER AccessToken
-    A valid Azure DevOps Bearer token with access to organization settings.
+    A valid Azure DevOps Bearer token with access to organization settings. Accepts a bare token or a complete
+    authorization header value ('Bearer ...' or 'Basic ...').
 
     .EXAMPLE
     Invoke-AdoPipelineSettingsQuery -Organization "MyOrg" -AccessToken $token
@@ -30,6 +31,11 @@ function Read-AdoOrganizationPipelinesSettings {
 
     # Define endpoint for pipeline settings query
     $uri = "https://dev.azure.com/$Organization/_apis/Contribution/HierarchyQuery?api-version=5.0-preview.1"
+
+    # Accept a bare access token as well as a complete authorization header value
+    if ($AccessToken -notmatch '^(Bearer|Basic) ') {
+        $AccessToken = "Bearer $AccessToken"
+    }
 
     # Set headers for authentication
     $headers = @{
@@ -183,7 +189,7 @@ function Export-AdoOrganizationPipelinesSettings {
     
     # Check for active connection
     if ($null -eq $script:connection) {
-        throw 'Not connected to Azure DevOps. Run Connect-AzDevOps first.'
+        throw 'Not connected to Azure DevOps. Run Connect-AzDevOps first'
     }
     
     # Retrieve pipeline settings

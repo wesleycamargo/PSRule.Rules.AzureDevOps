@@ -27,6 +27,12 @@ Get-ChildItem -Path "$PSScriptRoot/*.Rule.ps1" | ForEach-Object {
     .DESCRIPTION
     Run all JSON export functions for Azure DevOps using Azure DevOps Rest API and this modules functions for analysis by PSRule
 
+    .PARAMETER Organization
+    Optional. The connected organization is always used; a different value only produces a warning.
+
+    .PARAMETER OrganizationId
+    Optional. Defaults to the organization ID of the connection (Connect-AzDevOps -OrganizationId).
+
     .PARAMETER Project
     Project name for Azure DevOps
 
@@ -42,11 +48,11 @@ Get-ChildItem -Path "$PSScriptRoot/*.Rule.ps1" | ForEach-Object {
 function Export-AzDevOpsRuleData {
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory)]
+        [Parameter()]
         [string]
         $Organization,
 
-        [Parameter(Mandatory)]
+        [Parameter()]
         [string]
         $OrganizationId,
 
@@ -67,13 +73,15 @@ function Export-AzDevOpsRuleData {
         throw 'Not connected to Azure DevOps. Run Connect-AzDevOps first.'
     }
 
-    if ($Organization -ne $script:connection.Organization) {
+    if ($Organization -and $Organization -ne $script:connection.Organization) {
         Write-Warning "Provided Organization ($Organization) differs from connected organization ($($script:connection.Organization)). Using connected organization."
     }
 
     $Organization = $script:connection.Organization
     $AccessToken = $script:connection.Token
-    $OrganizationId = $script:connection.OrganizationId
+    if (-not $OrganizationId) {
+        $OrganizationId = $script:connection.OrganizationId
+    }
 
     Write-Host "Exporting rule data for project [$Project] to [$OutputPath]" -ForegroundColor Green
 

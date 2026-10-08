@@ -9,7 +9,7 @@
     The GUID of the Azure DevOps organization (e.g., 'a6c61e95-bc6a-4998-b599-5c1add3fd48b').
 
     .PARAMETER AccessToken
-    A valid Azure DevOps Bearer token with permission to query billing details.
+    A valid Azure DevOps Bearer token with permission to query billing details. Accepts a bare token or a complete authorization header value.
 
     .PARAMETER ExpectedSubscriptionId
     (Optional) The expected Azure subscription ID to compare against the billing setup.
@@ -37,6 +37,11 @@ function Read-AdoOrganizationGeneralBillingSettings {
     }
 
     $uri = "https://azdevopscommerce.dev.azure.com/$OrganizationId/_apis/AzComm/BillingSetup?api-version=7.1-preview.1"
+    # Accept a bare access token as well as a complete authorization header value
+    if ($AccessToken -notmatch '^(Bearer|Basic) ') {
+        $AccessToken = "Bearer $AccessToken"
+    }
+
     $headers = @{
         Authorization = $AccessToken
         Accept        = "application/json"

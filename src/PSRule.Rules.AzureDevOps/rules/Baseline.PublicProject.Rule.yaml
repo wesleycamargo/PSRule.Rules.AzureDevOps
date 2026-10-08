@@ -7,6 +7,7 @@ spec:
     exclude:
       - 'Azure.DevOps.Project.Visibility'
       - 'Azure.DevOps.Pipelines.Settings.StatusBadgesPrivate'
+      - 'Azure.DevOps.Organization.Pipelines.Settings.DisableAnonymousBadgeAccess'
     tag:
       release: GA
   configuration:

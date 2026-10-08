@@ -161,6 +161,10 @@ function Get-AzDevOpsPipelineYaml {
         } | ConvertTo-Json -Depth 10
 
         $response = Invoke-RestMethod -Uri $uri -Method POST -Headers $header -Body $postBody -ContentType "application/json"
+        # if the response is not an object but a string, the authentication failed
+        if ($response -is [string]) {
+            throw "Authentication failed or project not found"
+        }
         $yaml = $response.finalYaml
     }
     catch {
@@ -169,6 +173,9 @@ function Get-AzDevOpsPipelineYaml {
         Write-Verbose "Getting pipeline details from $uri"
         try {
             $response = Invoke-RestMethod -Uri $uri -Method Get -Headers $header
+            if ($response -is [string]) {
+                throw "Authentication failed or project not found"
+            }
         }
         catch {
             throw $_.Exception.Message
@@ -182,6 +189,10 @@ function Get-AzDevOpsPipelineYaml {
         # Try to get the raw YAML definition from the repository
         try {
             $response = Invoke-RestMethod -Uri $uri -Method Get -Headers $header
+            # The raw YAML is a string, so detect the HTML sign-in page instead
+            if ($response -match '^\s*<(!DOCTYPE|html)') {
+                throw "Authentication failed"
+            }
         }
         catch {
             Write-Warning "Getting raw YAML definition from default branch failed, pipeline YAML definition will be empty"

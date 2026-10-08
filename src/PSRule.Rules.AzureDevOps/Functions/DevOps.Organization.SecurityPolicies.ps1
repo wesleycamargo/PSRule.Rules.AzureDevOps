@@ -34,6 +34,11 @@ function Read-AdoOrganizationSecurityPolicies {
     # Construct the internal policy settings endpoint
     $uri = "https://dev.azure.com/$Organization/_settings/organizationPolicy?__rt=fps&__ver=2"
 
+    # Accept a bare access token as well as a complete authorization header value
+    if ($AccessToken -notmatch '^(Bearer|Basic) ') {
+        $AccessToken = "Bearer $AccessToken"
+    }
+
     # Set headers with Bearer token
     $headers = @{
         Authorization = $AccessToken
