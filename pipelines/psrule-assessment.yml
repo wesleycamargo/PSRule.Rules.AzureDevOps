@@ -68,7 +68,6 @@ steps:
             TenantId = $env:ADO_TENANT_ID
             ClientId = $env:ADO_CLIENT_ID
             ClientSecret = $env:ADO_CLIENT_SECRET
-            TokenType = 'FullAccess'
         }
         Connect-AzDevOps @connectParams
         Export-AzDevOpsOrganizationRuleData `
