@@ -8,6 +8,12 @@
     .PARAMETER Organization
         The name of the Azure DevOps organization to connect to.
 
+    .PARAMETER OrganizationId
+        Optional organization ID (GUID). Stored on the connection for every authentication mode; the organization billing settings export requires it.
+
+    .PARAMETER TokenType
+        The permission profile of the credential: FullAccess (default), ReadOnly, or FineGrained. Collectors skip data the profile cannot read.
+
     .PARAMETER PAT
         A Personal Access Token (PAT) used to authenticate to Azure DevOps. Used with the 'Pat' parameter set.
 
@@ -57,9 +63,20 @@
         [string]
         $Organization,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter(ParameterSetName = 'Bearer')]
+        [Parameter(ParameterSetName = 'Pat')]
+        [Parameter(ParameterSetName = 'ServicePrincipal')]
+        [Parameter(ParameterSetName = 'ManagedIdentity')]
         [string]
         $OrganizationId,
+
+        [Parameter(ParameterSetName = 'Pat')]
+        [Parameter(ParameterSetName = 'ServicePrincipal')]
+        [Parameter(ParameterSetName = 'ManagedIdentity')]
+        [Parameter(ParameterSetName = 'Bearer')]
+        [ValidateSet('FullAccess', 'ReadOnly', 'FineGrained')]
+        [string]
+        $TokenType = 'FullAccess',
 
         [Parameter(Mandatory = $true, ParameterSetName = 'Pat')]
         [string]
@@ -86,23 +103,25 @@
         $AccessToken
     )
 
-    switch ($PSCmdlet.ParameterSetName) {
-        'Pat' {
-            $script:connection = [AzureDevOpsConnection]::new($Organization, $PAT)
-        }
-        'ServicePrincipal' {
-            $script:connection = [AzureDevOpsConnection]::new($Organization, $ClientId, $ClientSecret, $TenantId)
-        }
-        'ManagedIdentity' {
-            $script:connection = [AzureDevOpsConnection]::new($Organization)
-        }
-        'Bearer' {
-            $script:connection = [AzureDevOpsConnection]::new($Organization, $OrganizationId, $AccessToken, 'FullAccess', $true)
-        }
-    }
-
-    # Verify connection with a simple API call
     try {
+        switch ($PSCmdlet.ParameterSetName) {
+            'Pat' {
+                $script:connection = [AzureDevOpsConnection]::new($Organization, $PAT, $TokenType)
+            }
+            'ServicePrincipal' {
+                $script:connection = [AzureDevOpsConnection]::new($Organization, $ClientId, $ClientSecret, $TenantId, $TokenType)
+            }
+            'ManagedIdentity' {
+                $script:connection = [AzureDevOpsConnection]::new($Organization, $TokenType)
+            }
+            'Bearer' {
+                $script:connection = [AzureDevOpsConnection]::new($Organization, $OrganizationId, $AccessToken, $TokenType, $true)
+            }
+        }
+
+        $script:connection.OrganizationId = $OrganizationId
+
+        # Verify connection with a simple API call
         $uri = "https://dev.azure.com/$Organization/_apis/projects?api-version=7.0"
         Invoke-RestMethod -Uri $uri -Method Get -Headers $script:connection.GetHeader() | Out-Null
         Write-Verbose "Successfully connected to Azure DevOps organization: $Organization"
