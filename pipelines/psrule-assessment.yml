@@ -18,6 +18,12 @@ variables:
     value: "ai-experiments"
   - name: ADO_ORGANIZATION_ID
     value: "3b022c28-683d-4d7e-87a5-bd8198332011"
+  - name: ADO_TENANT_ID
+    value: $[ variables['Directory (tenant) ID'] ]
+  - name: ADO_CLIENT_ID
+    value: $[ variables['Application (client) ID'] ]
+  - name: ADO_CLIENT_SECRET
+    value: $[ variables['secret'] ]
   - name: PSRULE_VERSION
     value: "2.9.0"
 
@@ -99,9 +105,9 @@ steps:
     env:
       ADO_ORGANIZATION: $(ADO_ORGANIZATION)
       ADO_ORGANIZATION_ID: $(ADO_ORGANIZATION_ID)
-      ADO_TENANT_ID: $(Directory (tenant) ID)
-      ADO_CLIENT_ID: $(Application (client) ID)
-      ADO_CLIENT_SECRET: $(secret)
+      ADO_TENANT_ID: $(ADO_TENANT_ID)
+      ADO_CLIENT_ID: $(ADO_CLIENT_ID)
+      ADO_CLIENT_SECRET: $(ADO_CLIENT_SECRET)
 
   - task: PublishBuildArtifacts@1
     displayName: Publish PSRule SARIF report
