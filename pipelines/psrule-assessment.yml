@@ -62,12 +62,22 @@ steps:
         $moduleManifest = Join-Path $env:BUILD_SOURCESDIRECTORY 'src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1'
         Import-Module $moduleManifest -Force
 
+        $tokenBody = @{
+            grant_type = 'client_credentials'
+            client_id = $env:ADO_CLIENT_ID
+            client_secret = $env:ADO_CLIENT_SECRET
+            scope = '499b84ac-1321-427f-aa17-267ca6975798/.default'
+        }
+        $accessToken = (Invoke-RestMethod `
+            -Uri "https://login.microsoftonline.com/$($env:ADO_TENANT_ID)/oauth2/v2.0/token" `
+            -Method Post `
+            -Body $tokenBody `
+            -ContentType 'application/x-www-form-urlencoded').access_token
+
         $connectParams = @{
             Organization = $env:ADO_ORGANIZATION
             OrganizationId = $env:ADO_ORGANIZATION_ID
-            TenantId = $env:ADO_TENANT_ID
-            ClientId = $env:ADO_CLIENT_ID
-            ClientSecret = $env:ADO_CLIENT_SECRET
+            AccessToken = $accessToken
         }
         Connect-AzDevOps @connectParams
         Export-AzDevOpsOrganizationRuleData `
