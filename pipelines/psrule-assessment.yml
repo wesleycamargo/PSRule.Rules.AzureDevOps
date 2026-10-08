@@ -22,7 +22,7 @@ variables:
     value: "2.9.0"
 
 pool:
-  vmImage: windows-latest
+  name: AI-Pool
 
 steps:
   - checkout: self
@@ -59,7 +59,8 @@ steps:
         $reportPath = Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'psrule-results.sarif'
 
         New-Item -Path $exportPath -ItemType Directory -Force | Out-Null
-        Import-Module "$env:BUILD_SOURCESDIRECTORY\src\PSRule.Rules.AzureDevOps\PSRule.Rules.AzureDevOps.psd1" -Force
+        $moduleManifest = Join-Path $env:BUILD_SOURCESDIRECTORY 'src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1'
+        Import-Module $moduleManifest -Force
 
         $connectParams = @{
             Organization = $env:ADO_ORGANIZATION

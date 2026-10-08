@@ -34,4 +34,8 @@ Rule violations are reported in the SARIF artifact and the job log but do not
 fail the pipeline. Authentication, export, and execution errors fail the run.
 Open the artifact with the Azure DevOps SARIF Viewer extension if installed.
 
+The pipeline uses the project self-hosted `AI-Pool` rather than Microsoft-hosted
+capacity. At least one Linux agent in that pool must be online for scheduled or
+manual runs to start.
+
 ![Sarif Viewer](../assets/media/sarif-0.0.11.png)
