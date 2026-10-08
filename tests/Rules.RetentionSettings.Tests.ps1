@@ -9,8 +9,8 @@ BeforeAll {
 
     # Setup tests paths
     # $rootPath = $PWD;
-    $rootPath = $env:GITHUB_WORKSPACE
-    $ourModule = (Join-Path -Path $rootPath -ChildPath '/src/PSRule.Rules.AzureDevOps')
+    $rootPath = Split-Path -Path $PSScriptRoot -Parent
+    $ourModule = (Join-Path -Path $rootPath -ChildPath 'src/PSRule.Rules.AzureDevOps')
 
     Import-Module -Name $ourModule -Force
     $here = (Resolve-Path $PSScriptRoot).Path
@@ -37,7 +37,7 @@ BeforeAll {
     $ruleResultFineGrained = Invoke-PSRule -InputPath "$($outPathFineGrained)/" -Module PSRule.Rules.AzureDevOps -Format Detect -Culture en
 }
 
-Describe "Azure.DevOps.RetentionSettings rules" {
+Describe "Azure.DevOps.RetentionSettings rules" -Tag 'Integration' {
     Context ' Azure.DevOps.RetentionSettings.ArtifactMinimumRetentionDays' {
         It ' should pass once' {
             $ruleHits = @($ruleResult | Where-Object { $_.RuleName -eq 'Azure.DevOps.RetentionSettings.ArtifactMinimumRetentionDays' })

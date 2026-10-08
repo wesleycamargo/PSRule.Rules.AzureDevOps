@@ -9,8 +9,8 @@ BeforeAll {
 
     # Setup tests paths
     # $rootPath = $PWD;
-    $rootPath = $env:GITHUB_WORKSPACE
-    $ourModule = (Join-Path -Path $rootPath -ChildPath '/src/PSRule.Rules.AzureDevOps')
+    $rootPath = Split-Path -Path $PSScriptRoot -Parent
+    $ourModule = (Join-Path -Path $rootPath -ChildPath 'src/PSRule.Rules.AzureDevOps')
 
     Import-Module -Name $ourModule -Force
     $here = (Resolve-Path $PSScriptRoot).Path
@@ -37,7 +37,7 @@ BeforeAll {
     $ruleResultFineGrained = Invoke-PSRule -InputPath "$($outPathFineGrained)/" -Module PSRule.Rules.AzureDevOps -Format Detect -Culture en
 }
 
-Describe "Azure.DevOps.Pipelines.Environments rules" {
+Describe "Azure.DevOps.Pipelines.Environments rules" -Tag 'Integration' {
     Context ' Azure.DevOps.Pipelines.Environments.ProductionCheckProtection' {
         It ' should fail for targets named fail' {
             $ruleHits = @($ruleResult | Where-Object { $_.RuleName -eq 'Azure.DevOps.Pipelines.Environments.ProductionCheckProtection' -and $_.TargetName -match 'production-fail$' })

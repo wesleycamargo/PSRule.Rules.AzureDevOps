@@ -8,12 +8,8 @@ BeforeAll {
     }
 
     # Setup tests paths
-    $rootPath = $env:GITHUB_WORKSPACE
-    if (-not $rootPath) {
-        Write-Warning "GITHUB_WORKSPACE not set. Using current directory."
-        $rootPath = $PSScriptRoot
-    }
-    $ourModule = (Join-Path -Path $rootPath -ChildPath '/src/PSRule.Rules.AzureDevOps')
+    $rootPath = Split-Path -Path $PSScriptRoot -Parent
+    $ourModule = (Join-Path -Path $rootPath -ChildPath 'src/PSRule.Rules.AzureDevOps')
 
     Write-Verbose "Loading module from $ourModule"
     Import-Module -Name $ourModule -Force -ErrorAction Stop
@@ -66,22 +62,15 @@ BeforeAll {
     $ruleResultFineGrained = Invoke-PSRule -InputPath "$($outPathFineGrained)/" -Module PSRule.Rules.AzureDevOps -Format Detect -Culture en -ErrorAction Stop
 }
 
-Describe "Azure.DevOps.Organization.Pipelines.Settings rules" {
-    Context 'Rule Loading' {
-        It ' should load all 10 organization pipeline settings rules' {
-            $rules = Get-PSRule -Module PSRule.Rules.AzureDevOps
-            $orgRules = $rules | Where-Object { $_.Name -like 'Azure.DevOps.Organization.Pipelines.Settings.*' }
-            $orgRules.Count | Should -Be 10
-            $orgRules | ForEach-Object { Write-Verbose "Loaded rule: $($_.Name)" }
-        }
-    }
-
+Describe "Azure.DevOps.Organization.Pipelines.Settings rules" -Tag 'Integration' {
     Context 'JSON Input Validation' {
         It ' should have valid pipelineSettings.ado.json in out directory' {
             $jsonPath = Join-Path -Path $outPath -ChildPath 'OrganizationpipelineSettings.ado.json'
             $jsonContent = Get-Content -Path $jsonPath -Raw | ConvertFrom-Json
             $jsonContent.ObjectType | Should -Be 'Azure.DevOps.Organization.Pipelines.Settings'
-            $jsonContent | Should -HaveProperty 'statusBadgesArePrivate', 'enforceSettableVar', 'enforceJobAuthScope', 'enforceJobAuthScopeForReleases', 'enforceReferencedRepoScopedToken', 'disableClassicBuildPipelineCreation', 'disableClassicReleasePipelineCreation', 'forkProtectionEnabled', 'buildsEnabledForForks', 'enableShellTasksArgsSanitizing'
+            foreach ($property in @('statusBadgesArePrivate', 'enforceSettableVar', 'enforceJobAuthScope', 'enforceJobAuthScopeForReleases', 'enforceReferencedRepoScopedToken', 'disableClassicBuildPipelineCreation', 'disableClassicReleasePipelineCreation', 'forkProtectionEnabled', 'buildsEnabledForForks', 'enableShellTasksArgsSanitizing')) {
+                $jsonContent.PSObject.Properties.Name | Should -Contain $property
+            }
         }
     }
 

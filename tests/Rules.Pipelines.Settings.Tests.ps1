@@ -9,8 +9,8 @@ BeforeAll {
 
     # Setup tests paths
     # $rootPath = $PWD;
-    $rootPath = $env:GITHUB_WORKSPACE
-    $ourModule = (Join-Path -Path $rootPath -ChildPath '/src/PSRule.Rules.AzureDevOps')
+    $rootPath = Split-Path -Path $PSScriptRoot -Parent
+    $ourModule = (Join-Path -Path $rootPath -ChildPath 'src/PSRule.Rules.AzureDevOps')
 
     Import-Module -Name $ourModule -Force
     $here = (Resolve-Path $PSScriptRoot).Path
@@ -40,7 +40,7 @@ BeforeAll {
     $ruleResultFineGrained = Invoke-PSRule -InputPath "$($outPathFineGrained)/" -Module PSRule.Rules.AzureDevOps -Format Detect -Culture en
 }
 
-Describe "Azure.DevOps.Pipelines.Settings rules" {
+Describe "Azure.DevOps.Pipelines.Settings rules" -Tag 'Integration' {
     Context ' Azure.DevOps.Pipelines.Settings.LimitSetVariablesAtQueueTime' {
         It ' should Pass' {
             $ruleHits = @($ruleResult | Where-Object { $_.RuleName -eq 'Azure.DevOps.Pipelines.Settings.LimitSetVariablesAtQueueTime' })
