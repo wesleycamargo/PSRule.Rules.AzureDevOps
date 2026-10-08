@@ -13,13 +13,33 @@
       "args": ["-RootDirectory", "${workspaceFolder}"]
     },
     {
-      "name": "PowerShell: Run Pester Tests",
+      "name": "Pester: Unit Tests",
       "type": "PowerShell",
       "request": "launch",
-      "script": "${workspaceFolder}/.vscode/run-tests.ps1",
+      "script": "${workspaceFolder}/tests/Run-Tests.ps1",
+      "cwd": "${workspaceFolder}",
       "createTemporaryIntegratedConsole": true,
-      "attachDotnetDebugger": true,
-      "args": ["-RootDirectory", "${workspaceFolder}"]
+      "args": ["-TestType", "Unit"]
+    },
+    {
+      // Missing ADO_* variables are filled from the Azure CLI login (az login). Requires tests/Initialize-IntegrationTestData.ps1 to have been run.
+      "name": "Pester: Integration Tests",
+      "type": "PowerShell",
+      "request": "launch",
+      "script": "${workspaceFolder}/tests/Run-Tests.ps1",
+      "cwd": "${workspaceFolder}",
+      "createTemporaryIntegratedConsole": true,
+      "args": ["-TestType", "Integration"]
+    },
+    {
+      // Service principal tests need ADO_CLIENT_ID, ADO_CLIENT_SECRET, and ADO_TENANT_ID; managed identity tests only work on Azure-hosted agents.
+      "name": "Pester: Authentication Tests",
+      "type": "PowerShell",
+      "request": "launch",
+      "script": "${workspaceFolder}/tests/Run-Tests.ps1",
+      "cwd": "${workspaceFolder}",
+      "createTemporaryIntegratedConsole": true,
+      "args": ["-TestType", "Authentication"]
     }
   ]
 }
