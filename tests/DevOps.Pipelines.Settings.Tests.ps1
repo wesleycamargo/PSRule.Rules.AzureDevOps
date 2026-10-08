@@ -1,9 +1,9 @@
 BeforeAll {
-    $rootPath = $PWD;
-    Import-Module -Name (Join-Path -Path $rootPath -ChildPath '/src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1') -Force;
+    $rootPath = Split-Path -Path $PSScriptRoot -Parent;
+    Import-Module -Name (Join-Path -Path $rootPath -ChildPath 'src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1') -Force;
 }
 
-Describe "Functions: DevOps.Pipelines.Settings.Tests" {
+Describe "Functions: DevOps.Pipelines.Settings.Tests" -Tag 'Integration' {
     Context " Get-AzDevOpsPipelinesSettings without a connection" {
         It " should throw an error" {
             { 
@@ -34,8 +34,7 @@ Describe "Functions: DevOps.Pipelines.Settings.Tests" {
         }
 
         It " should throw a 404 error with a wrong project and organization" {
-            Connect-AzDevOps -Organization 'wrong-org' -PAT $env:ADO_PAT
-            { Get-AzDevOpsPipelinesSettings -Project "wrong-project" -ErrorAction Stop } | Should -Throw
+            { Connect-AzDevOps -Organization 'wrong-org' -PAT $env:ADO_PAT; Get-AzDevOpsPipelinesSettings -Project "wrong-project" -ErrorAction Stop } | Should -Throw
         }
     }
 

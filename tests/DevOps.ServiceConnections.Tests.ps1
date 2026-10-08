@@ -1,9 +1,9 @@
 BeforeAll {
-    $rootPath = $PWD;
-    Import-Module -Name (Join-Path -Path $rootPath -ChildPath '/src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1') -Force;
+    $rootPath = Split-Path -Path $PSScriptRoot -Parent;
+    Import-Module -Name (Join-Path -Path $rootPath -ChildPath 'src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1') -Force;
 }
 
-Describe "Functions: DevOps.ServiceConnections.Tests" {
+Describe "Functions: DevOps.ServiceConnections.Tests" -Tag 'Integration' {
     Context " Get-AzDevOpsServiceConnections without a connection" {
         It " should throw an error" {
             { 
@@ -40,8 +40,7 @@ Describe "Functions: DevOps.ServiceConnections.Tests" {
         }
 
         It " should throw a 404 error with a wrong project and organization" {
-            Connect-AzDevOps -Organization 'wrong-org' -PAT $env:ADO_PAT
-            { Get-AzDevOpsServiceConnections -Project "wrong-project" -ErrorAction Stop } | Should -Throw
+            { Connect-AzDevOps -Organization 'wrong-org' -PAT $env:ADO_PAT; Get-AzDevOpsServiceConnections -Project "wrong-project" -ErrorAction Stop } | Should -Throw
         }
     }
 
@@ -93,8 +92,7 @@ Describe "Functions: DevOps.ServiceConnections.Tests" {
         }
 
         It " should throw a 404 error with a wrong project and organization" {
-            Connect-AzDevOps -Organization 'wrong-org' -PAT $env:ADO_PAT
-            { Get-AzDevOpsServiceConnectionChecks -Project "wrong-project" -ServiceConnectionId 1 -ErrorAction Stop } | Should -Throw
+            { Connect-AzDevOps -Organization 'wrong-org' -PAT $env:ADO_PAT; Get-AzDevOpsServiceConnectionChecks -Project "wrong-project" -ServiceConnectionId 1 -ErrorAction Stop } | Should -Throw
         }
     }
 
@@ -133,8 +131,7 @@ Describe "Functions: DevOps.ServiceConnections.Tests" {
         }
 
         It " should throw a 404 error with a wrong project and organization" {
-            Connect-AzDevOps -Organization 'wrong-org' -PAT $env:ADO_PAT
-            { Get-AzDevOpsServiceConnectionAcls -ProjectId "wrong-project" -ServiceConnectionId 1 -ErrorAction Stop } | Should -Throw
+            { Connect-AzDevOps -Organization 'wrong-org' -PAT $env:ADO_PAT; Get-AzDevOpsServiceConnectionAcls -ProjectId "wrong-project" -ServiceConnectionId 1 -ErrorAction Stop } | Should -Throw
         }
     }
 

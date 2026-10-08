@@ -1,9 +1,9 @@
 BeforeAll {
-    $rootPath = $PWD
-    Import-Module -Name (Join-Path -Path $rootPath -ChildPath '/src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1') -Force
+    $rootPath = Split-Path -Path $PSScriptRoot -Parent
+    Import-Module -Name (Join-Path -Path $rootPath -ChildPath 'src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1') -Force
 }
 
-Describe "Functions: DevOps.Pipelines.Releases.Tests" {
+Describe "Functions: DevOps.Pipelines.Releases.Tests" -Tag 'Integration' {
     Context " Get-AzDevOpsReleaseDefinitions without a connection" {
         It " should throw an error" {
             { 
@@ -59,8 +59,7 @@ Describe "Functions: DevOps.Pipelines.Releases.Tests" {
         }
 
         It " should throw a 404 error with a wrong project and organization" {
-            Connect-AzDevOps -Organization 'wrong-org' -PAT $env:ADO_PAT
-            { Get-AzDevOpsReleaseDefinitions -Project "wrong-project" } | Should -Throw
+            { Connect-AzDevOps -Organization 'wrong-org' -PAT $env:ADO_PAT; Get-AzDevOpsReleaseDefinitions -Project "wrong-project" } | Should -Throw
         }
 
         AfterAll {
@@ -80,8 +79,9 @@ Describe "Functions: DevOps.Pipelines.Releases.Tests" {
     Context " Get-AzDevOpsReleaseDefinitionAcls on a project with release definitions" {
         BeforeAll {
             Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT $env:ADO_PAT
-            $ProjectId = "1fa185aa-ce58-4732-8700-8964802ea538"
-            $releaseDefinitionAcls = Get-AzDevOpsReleaseDefinitionAcls -ProjectId $ProjectId -ReleaseDefinitionId 2 -Folder ''
+            $ProjectId = (Get-AzDevOpsProject -Project $env:ADO_PROJECT).id
+            $releaseDefinitionId = (Get-AzDevOpsReleaseDefinitions -Project $env:ADO_PROJECT | Where-Object { $_.name -eq 'psrule-release-Success' }).id
+            $releaseDefinitionAcls = Get-AzDevOpsReleaseDefinitionAcls -ProjectId $ProjectId -ReleaseDefinitionId $releaseDefinitionId -Folder ''
         }
 
         It " should return a list of release definition acls" {
@@ -105,8 +105,7 @@ Describe "Functions: DevOps.Pipelines.Releases.Tests" {
         }
 
         It " should throw a 404 error with a wrong project and organization" {
-            Connect-AzDevOps -Organization 'wrong-org' -PAT $env:ADO_PAT
-            { Get-AzDevOpsReleaseDefinitionAcls -ProjectId "wrong-project" -ReleaseDefinitionId 2 -Folder '' } | Should -Throw
+            { Connect-AzDevOps -Organization 'wrong-org' -PAT $env:ADO_PAT; Get-AzDevOpsReleaseDefinitionAcls -ProjectId "wrong-project" -ReleaseDefinitionId 2 -Folder '' } | Should -Throw
         }
 
         AfterAll {

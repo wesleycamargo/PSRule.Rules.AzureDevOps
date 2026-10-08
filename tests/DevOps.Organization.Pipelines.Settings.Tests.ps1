@@ -1,15 +1,14 @@
 BeforeAll {
-    $rootPath = $PWD;
-    Import-Module -Name (Join-Path -Path $rootPath -ChildPath '/src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1') -Force;
+    $rootPath = Split-Path -Path $PSScriptRoot -Parent;
+    Import-Module -Name (Join-Path -Path $rootPath -ChildPath 'src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1') -Force;
 }
 
-Describe "Functions: DevOps.OrganizationPipelinesSettings" {
-    Context " Read-AdoOrganizationPipelinesSettings without a connection" {
-        It " should throw an error" {
-            { 
-                Disconnect-AzDevOps
-                Read-AdoOrganizationPipelinesSettings -Organization $env:ADO_ORGANIZATION -AccessToken $env:ADO_ACCESS_TOKEN
-            } | Should -Throw "Not connected to Azure DevOps. Run Connect-AzDevOps first"
+Describe "Functions: DevOps.OrganizationPipelinesSettings" -Tag 'Integration' {
+    Context " Read-AdoOrganizationPipelinesSettings with an explicit token" {
+        It " should not require a module connection" {
+            Disconnect-AzDevOps
+            $settings = Read-AdoOrganizationPipelinesSettings -Organization $env:ADO_ORGANIZATION -AccessToken $env:ADO_ACCESS_TOKEN
+            $settings | Should -Not -BeNullOrEmpty
         }
     }
     Context " Read-AdoOrganizationPipelinesSettings on an organization" {
@@ -29,13 +28,11 @@ Describe "Functions: DevOps.OrganizationPipelinesSettings" {
 
     Context " Read-AdoOrganizationPipelinesSettings with wrong parameters" {
         It " should throw an error with a wrong AccessToken" {
-            Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -AccessToken "wrong-token"
-            { Read-AdoOrganizationPipelinesSettings -Organization $env:ADO_ORGANIZATION -AccessToken "wrong-token" -ErrorAction Stop } | Should -Throw
+            { Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -AccessToken "wrong-token"; Read-AdoOrganizationPipelinesSettings -Organization $env:ADO_ORGANIZATION -AccessToken "wrong-token" -ErrorAction Stop } | Should -Throw
         }
 
         It " should throw a 404 error with a wrong organization" {
-            Connect-AzDevOps -Organization 'wrong-org' -AccessToken $env:ADO_ACCESS_TOKEN
-            { Read-AdoOrganizationPipelinesSettings -Organization 'wrong-org' -AccessToken $env:ADO_ACCESS_TOKEN -ErrorAction Stop } | Should -Throw
+            { Connect-AzDevOps -Organization 'wrong-org' -AccessToken $env:ADO_ACCESS_TOKEN; Read-AdoOrganizationPipelinesSettings -Organization 'wrong-org' -AccessToken $env:ADO_ACCESS_TOKEN -ErrorAction Stop } | Should -Throw
         }
     }
 

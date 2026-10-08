@@ -1,14 +1,14 @@
 BeforeAll {
-    $rootPath = $PWD;
-    Import-Module -Name (Join-Path -Path $rootPath -ChildPath '/src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1') -Force;
+    $rootPath = Split-Path -Path $PSScriptRoot -Parent;
+    Import-Module -Name (Join-Path -Path $rootPath -ChildPath 'src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1') -Force;
 }
 
-Describe "Functions: DevOps.Repos.Tests" {
-    Context " Get-AzDevOpsRepos without a connection" {
+Describe "Functions: DevOps.Repos.Tests" -Tag 'Integration' {
+    Context " Get-AzDevOpsRepos without a connection" -Tag 'Unit' {
         It " should throw an error" {
             { 
                 Disconnect-AzDevOps
-                Get-AzDevOpsRepos -Project $env:ADO_PROJECT
+                Get-AzDevOpsRepos -Project 'test-project'
             } | Should -Throw "Not connected to Azure DevOps. Run Connect-AzDevOps first"
         }
     }
@@ -45,8 +45,7 @@ Describe "Functions: DevOps.Repos.Tests" {
         }
 
         It " should throw a 404 error with a wrong project and organization" {
-            Connect-AzDevOps -Organization 'wrong-org' -PAT $env:ADO_PAT
-            { Get-AzDevOpsRepos -Project "wrong-project" -ErrorAction Stop } | Should -Throw
+            { Connect-AzDevOps -Organization 'wrong-org' -PAT $env:ADO_PAT; Get-AzDevOpsRepos -Project "wrong-project" -ErrorAction Stop } | Should -Throw
         }
     }
 
@@ -112,8 +111,7 @@ Describe "Functions: DevOps.Repos.Tests" {
             Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT $env:ADO_PAT
             $repos = Get-AzDevOpsRepos -Project $env:ADO_PROJECT
             Disconnect-AzDevOps
-            Connect-AzDevOps -Organization 'wrong-org' -PAT $env:ADO_PAT
-            { Get-AzDevOpsBranches -Project "wrong-project" -Repository $repos[0].id -ErrorAction Stop } | Should -Throw
+            { Connect-AzDevOps -Organization 'wrong-org' -PAT $env:ADO_PAT; Get-AzDevOpsBranches -Project "wrong-project" -Repository $repos[0].id -ErrorAction Stop } | Should -Throw
         }
     }
 
@@ -122,8 +120,8 @@ Describe "Functions: DevOps.Repos.Tests" {
             { 
                 Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT $env:ADO_PAT
                 $repos = Get-AzDevOpsRepos -Project $env:ADO_PROJECT
-                $repository = $repos[1].id
-                $Branch = $repos[1].defaultBranch
+                $repository = ($repos | Where-Object { $_.name -eq 'repository-success' }).id
+                $Branch = ($repos | Where-Object { $_.name -eq 'repository-success' }).defaultBranch
                 Disconnect-AzDevOps
                 Get-AzDevOpsBranchPolicy -Project $env:ADO_PROJECT -Repository $repository -Branch $Branch
             } | Should -Throw "Not connected to Azure DevOps. Run Connect-AzDevOps first"
@@ -134,8 +132,8 @@ Describe "Functions: DevOps.Repos.Tests" {
         BeforeAll {
             Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT $env:ADO_PAT
             $repos = Get-AzDevOpsRepos -Project $env:ADO_PROJECT
-            $repository = $repos[1].id
-            $Branch = $repos[1].defaultBranch
+            $repository = ($repos | Where-Object { $_.name -eq 'repository-success' }).id
+            $Branch = ($repos | Where-Object { $_.name -eq 'repository-success' }).defaultBranch
             $policy = Get-AzDevOpsBranchPolicy -Project $env:ADO_PROJECT -Repository $repository -Branch $Branch
         }
 
@@ -156,8 +154,8 @@ Describe "Functions: DevOps.Repos.Tests" {
         BeforeAll {
             Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT $env:ADO_PAT
             $repos = Get-AzDevOpsRepos -Project $env:ADO_PROJECT
-            $repository = $repos[0].id
-            $Branch = $repos[0].defaultBranch
+            $repository = ($repos | Where-Object { $_.name -eq 'psrule-fail-project' }).id
+            $Branch = ($repos | Where-Object { $_.name -eq 'psrule-fail-project' }).defaultBranch
             $policy = Get-AzDevOpsBranchPolicy -Project $env:ADO_PROJECT -Repository $repository -Branch $Branch
         }
 
@@ -197,7 +195,7 @@ Describe "Functions: DevOps.Repos.Tests" {
     Context " Get-AzDevOpsRepositoryAcls" {
         BeforeAll {
             Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT $env:ADO_PAT
-            $ProjectId = "1fa185aa-ce58-4732-8700-8964802ea538"
+            $ProjectId = (Get-AzDevOpsProject -Project $env:ADO_PROJECT).id
             $repos = Get-AzDevOpsRepos -Project $env:ADO_PROJECT
             $RepositoryId = ($repos | Where-Object { $_.name -eq 'repository-success'})[0].id
             $repositoryAcls = Get-AzDevOpsRepositoryAcls -RepositoryId $RepositoryId -ProjectId $ProjectId
@@ -226,8 +224,7 @@ Describe "Functions: DevOps.Repos.Tests" {
         }
 
         It " should throw a 404 error with a wrong project and organization" {
-            Connect-AzDevOps -Organization 'wrong-org' -PAT $env:ADO_PAT
-            { Get-AzDevOpsRepositoryAcls -RepositoryId $RepositoryId -ProjectId $ProjectId -ErrorAction Stop } | Should -Throw
+            { Connect-AzDevOps -Organization 'wrong-org' -PAT $env:ADO_PAT; Get-AzDevOpsRepositoryAcls -RepositoryId $RepositoryId -ProjectId $ProjectId -ErrorAction Stop } | Should -Throw
         }
     }
 
@@ -284,8 +281,8 @@ Describe "Functions: DevOps.Repos.Tests" {
     Context " Get-AzDevOpsRepositoryGhas" {
         It " should return a [PSCustomObject]" {
             Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT $env:ADO_PAT
-            $ProjectId = "1fa185aa-ce58-4732-8700-8964802ea538"
-            $repoId = "befaaf13-3966-45c0-b481-6387e860d915"
+            $ProjectId = (Get-AzDevOpsProject -Project $env:ADO_PROJECT).id
+            $repoId = (Get-AzDevOpsRepos -Project $env:ADO_PROJECT | Where-Object { $_.name -eq 'repository-success' }).id
             $repositoryGhas = Get-AzDevOpsRepositoryGhas -RepositoryId $repoId -ProjectId $ProjectId
             $repositoryGhas | Should -BeOfType [PSCustomObject]
         }
@@ -303,8 +300,7 @@ Describe "Functions: DevOps.Repos.Tests" {
         }
 
         It " should throw a 404 error with a wrong project and organization" {
-            Connect-AzDevOps -Organization 'wrong-org' -PAT $env:ADO_PAT
-            { Get-AzDevOpsRepositoryGhas -RepositoryId $repoId -ProjectId $ProjectId -ErrorAction Stop } | Should -Throw
+            { Connect-AzDevOps -Organization 'wrong-org' -PAT $env:ADO_PAT; Get-AzDevOpsRepositoryGhas -RepositoryId $repoId -ProjectId $ProjectId -ErrorAction Stop } | Should -Throw
         }
     }
 
@@ -337,12 +333,12 @@ Describe "Functions: DevOps.Repos.Tests" {
     Context ' Get-AzDevOpsRepositoryPipelinePermissions' {
         BeforeAll {
             Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT $env:ADO_PAT
-            $ProjectId = "1fa185aa-ce58-4732-8700-8964802ea538"
+            $ProjectId = (Get-AzDevOpsProject -Project $env:ADO_PROJECT).id
             $repositoryName = 'repository-success'
-            $repoId = "befaaf13-3966-45c0-b481-6387e860d915"
+            $repoId = (Get-AzDevOpsRepos -Project $env:ADO_PROJECT | Where-Object { $_.name -eq 'repository-success' }).id
             $repoPipelinePermissions = Get-AzDevOpsRepositoryPipelinePermissions `
                 -ProjectId $ProjectId `
-                -RepositoryId "befaaf13-3966-45c0-b481-6387e860d915"
+                -RepositoryId $repoId
         }
 
         It ' should return an object' {
@@ -363,8 +359,7 @@ Describe "Functions: DevOps.Repos.Tests" {
         }
 
         It " should throw a 404 error with a wrong project and organization" {
-            Connect-AzDevOps -Organization 'wrong-org' -PAT $env:ADO_PAT
-            { Get-AzDevOpsRepositoryPipelinePermissions -RepositoryId $repoId -ProjectId $ProjectId -ErrorAction Stop } | Should -Throw
+            { Connect-AzDevOps -Organization 'wrong-org' -PAT $env:ADO_PAT; Get-AzDevOpsRepositoryPipelinePermissions -RepositoryId $repoId -ProjectId $ProjectId -ErrorAction Stop } | Should -Throw
         }
     }
 

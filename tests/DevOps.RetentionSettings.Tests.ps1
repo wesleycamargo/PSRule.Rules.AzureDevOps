@@ -1,10 +1,10 @@
 BeforeAll {
-    $rootPath = $PWD;
-    Import-Module -Name (Join-Path -Path $rootPath -ChildPath '/src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1') -Force;
+    $rootPath = Split-Path -Path $PSScriptRoot -Parent;
+    Import-Module -Name (Join-Path -Path $rootPath -ChildPath 'src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1') -Force;
 }
 
-Describe 'Azure.DevOps.RetentionSettings' {
-    Context ' Get-AzDevOpsRetentionSettings without a connection' {
+Describe 'Azure.DevOps.RetentionSettings' -Tag 'Integration' {
+    Context ' Get-AzDevOpsRetentionSettings without a connection' -Tag 'Unit' {
         It 'should throw an error' {
             { 
                 Disconnect-AzDevOps
@@ -58,7 +58,7 @@ Describe 'Azure.DevOps.RetentionSettings' {
                 Disconnect-AzDevOps
                 Connect-AzDevOps -Organization 'wrongOrganization' -PAT $env:ADO_PAT
                 Get-AzDevOpsRetentionSettings -Project $env:ADO_PROJECT
-            } | Should -Throw "Failed to get retention settings for project '$($env:ADO_PROJECT)' from Azure DevOps"
+            } | Should -Throw 'Failed to connect to Azure DevOps*'
         }
 
         It 'should throw an error with a wrong project' {
@@ -70,11 +70,11 @@ Describe 'Azure.DevOps.RetentionSettings' {
         }
     }
 
-    Context ' Export-AzDevOpsRetentionSettings without a connection' {
+    Context ' Export-AzDevOpsRetentionSettings without a connection' -Tag 'Unit' {
         It 'should throw an error' {
             { 
                 Disconnect-AzDevOps
-                Export-AzDevOpsRetentionSettings -Project 'MyProject' -OutputPath $Env:ADO_EXPORT_DIR
+                Export-AzDevOpsRetentionSettings -Project 'MyProject' -OutputPath $TestDrive
             } | Should -Throw 'Not connected to Azure DevOps. Run Connect-AzDevOps first.'
         }
     }
@@ -123,7 +123,7 @@ Describe 'Azure.DevOps.RetentionSettings' {
                 Disconnect-AzDevOps
                 Connect-AzDevOps -Organization 'wrongOrganization' -PAT $env:ADO_PAT
                 Export-AzDevOpsRetentionSettings -Project $env:ADO_PROJECT -OutputPath $Env:ADO_EXPORT_DIR
-            } | Should -Throw "Failed to get retention settings for project '$($env:ADO_PROJECT)' from Azure DevOps"
+            } | Should -Throw 'Failed to connect to Azure DevOps*'
         }
 
         It 'should throw an error with a wrong project' {

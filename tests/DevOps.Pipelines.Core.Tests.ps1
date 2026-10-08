@@ -1,14 +1,14 @@
 BeforeAll {
-    $rootPath = $PWD;
-    Import-Module -Name (Join-Path -Path $rootPath -ChildPath '/src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1') -Force;
+    $rootPath = Split-Path -Path $PSScriptRoot -Parent;
+    Import-Module -Name (Join-Path -Path $rootPath -ChildPath 'src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1') -Force;
 }
 
-Describe "Functions: DevOps.Pipelines.Core.Tests" {
-    Context " Get-AzDevOpsPipelines without a connection" {
+Describe "Functions: DevOps.Pipelines.Core.Tests" -Tag 'Integration' {
+    Context " Get-AzDevOpsPipelines without a connection" -Tag 'Unit' {
         It " should throw an error" {
             { 
                 Disconnect-AzDevOps
-                Get-AzDevOpsPipelines -Project $env:ADO_PROJECT
+                Get-AzDevOpsPipelines -Project 'test-project'
             } | Should -Throw "Not connected to Azure DevOps. Run Connect-AzDevOps first"
         }
     }
@@ -58,8 +58,7 @@ Describe "Functions: DevOps.Pipelines.Core.Tests" {
         }
 
         It " should throw a 404 error with a wrong project and organization" {
-            Connect-AzDevOps -Organization 'wrong-org' -PAT $env:ADO_PAT
-            { Get-AzDevOpsPipelines -Project "wrong-project" } | Should -Throw
+            { Connect-AzDevOps -Organization 'wrong-org' -PAT $env:ADO_PAT; Get-AzDevOpsPipelines -Project "wrong-project" } | Should -Throw
         }
 
         AfterAll {
@@ -67,7 +66,7 @@ Describe "Functions: DevOps.Pipelines.Core.Tests" {
         }
     }
 
-    Context " Get-AzDevOpsPipelineAcls without a connection" {
+    Context " Get-AzDevOpsPipelineAcls without a connection" -Tag 'Unit' {
         It " should throw an error" {
             { 
                 Disconnect-AzDevOps
@@ -79,8 +78,8 @@ Describe "Functions: DevOps.Pipelines.Core.Tests" {
     Context " Get-AzDevOpsPipelineAcls on a project with pipelines" {
         BeforeAll {
             Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT $env:ADO_PAT
-            $pipelineId = 7
-            $ProjectId = "1fa185aa-ce58-4732-8700-8964802ea538"
+            $pipelineId = (Get-AzDevOpsPipelines -Project $env:ADO_PROJECT | Where-Object { $_.name -eq 'psrule-success-project' }).id
+            $ProjectId = (Get-AzDevOpsProject -Project $env:ADO_PROJECT).id
             $pipelineAcls = Get-AzDevOpsPipelineAcls -PipelineId $PipelineId -ProjectId $ProjectId
         }
 
@@ -104,8 +103,7 @@ Describe "Functions: DevOps.Pipelines.Core.Tests" {
         }
 
         It " should throw a 404 error with a wrong project and organization" {
-            Connect-AzDevOps -Organization 'wrong-org' -PAT $env:ADO_PAT
-            { Get-AzDevOpsPipelineAcls -PipelineId 7 -ProjectId "this-is-wrong" } | Should -Throw
+            { Connect-AzDevOps -Organization 'wrong-org' -PAT $env:ADO_PAT; Get-AzDevOpsPipelineAcls -PipelineId 7 -ProjectId "this-is-wrong" } | Should -Throw
         }
 
         AfterAll {
@@ -134,11 +132,11 @@ Describe "Functions: DevOps.Pipelines.Core.Tests" {
         }
     }
 
-    Context " Get-AzDevOpsPipelineYaml without a connection" {
+    Context " Get-AzDevOpsPipelineYaml without a connection" -Tag 'Unit' {
         It " should throw an error" {
             { 
                 Disconnect-AzDevOps
-                Get-AzDevOpsPipelineYaml -PipelineId 7 -Project $env:ADO_PROJECT
+                Get-AzDevOpsPipelineYaml -PipelineId 7 -Project 'test-project'
             } | Should -Throw "Not connected to Azure DevOps. Run Connect-AzDevOps first"
         }
     }
@@ -146,7 +144,7 @@ Describe "Functions: DevOps.Pipelines.Core.Tests" {
     Context " Get-AzDevOpsPipelineYaml on a pipeline with all defaults" {
         BeforeAll {
             Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT $env:ADO_PAT
-            $pipelineId = 7
+            $pipelineId = (Get-AzDevOpsPipelines -Project $env:ADO_PROJECT | Where-Object { $_.name -eq 'psrule-success-project' }).id
             $Project = $env:ADO_PROJECT
             $pipelineYaml = Get-AzDevOpsPipelineYaml -PipelineId $PipelineId -Project $Project
         }
@@ -167,7 +165,7 @@ Describe "Functions: DevOps.Pipelines.Core.Tests" {
     Context " Get-AzDevOpsPipelineYaml on a pipeline that need parameters" {
         BeforeAll {
             Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT $env:ADO_PAT
-            $pipelineId = 10
+            $pipelineId = (Get-AzDevOpsPipelines -Project $env:ADO_PROJECT | Where-Object { $_.name -eq 'psrule-required-parameters' }).id
             $Project = $env:ADO_PROJECT
             $pipelineYaml = Get-AzDevOpsPipelineYaml -PipelineId $PipelineId -Project $Project
         }
@@ -188,12 +186,11 @@ Describe "Functions: DevOps.Pipelines.Core.Tests" {
     Context " Get-AzDevOpsPipelineYaml with wrong parameters" {
         It " should throw an error with a wrong PAT" {
             Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT "wrong-pat"
-            { Get-AzDevOpsPipelineYaml -PipelineId 7 -ProjectId "1fa185aa-ce58-4732-8700-8964802ea538" } | Should -Throw
+            { Get-AzDevOpsPipelineYaml -PipelineId 7 -Project "1fa185aa-ce58-4732-8700-8964802ea538" } | Should -Throw
         }
 
         It " should throw a 404 error with a wrong project and organization" {
-            Connect-AzDevOps -Organization 'wrong-org' -PAT $env:ADO_PAT
-            { Get-AzDevOpsPipelineYaml -PipelineId 7 -ProjectId "this-is-wrong" } | Should -Throw
+            { Connect-AzDevOps -Organization 'wrong-org' -PAT $env:ADO_PAT; Get-AzDevOpsPipelineYaml -PipelineId 7 -Project "this-is-wrong" } | Should -Throw
         }
 
         AfterAll {
@@ -213,7 +210,7 @@ Describe "Functions: DevOps.Pipelines.Core.Tests" {
     Context " Export-AzDevOpsPipelineYaml on a pipeline" {
         BeforeAll {
             Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT $env:ADO_PAT
-            $pipelineId = 7
+            $pipelineId = (Get-AzDevOpsPipelines -Project $env:ADO_PROJECT | Where-Object { $_.name -eq 'psrule-success-project' }).id
             $Project = $env:ADO_PROJECT
             Export-AzDevOpsPipelineYaml -PipelineId $PipelineId -Project $Project -OutputPath $env:ADO_EXPORT_DIR -PipelineName "psrule-success-project"
         }
@@ -272,6 +269,7 @@ Describe "Functions: DevOps.Pipelines.Core.Tests" {
     Context " Export-AzDevOpsPipelines -PassThru" {
         BeforeAll {
             Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT $env:ADO_PAT
+            # YAML pipelines emit their YAML before the pipeline object, so the last item is always a pipeline.
             $pipelines = Export-AzDevOpsPipelines -Project $env:ADO_PROJECT -PassThru
             $ruleResult = $pipelines | Where-Object { $null -ne $_ } | Invoke-PSRule -Module @('PSRule.Rules.AzureDevOps') -Culture en
         }
@@ -281,15 +279,15 @@ Describe "Functions: DevOps.Pipelines.Core.Tests" {
         }
 
         It " should return a list of pipelines that are of type PSObject" {
-            $pipelines[1] | Should -BeOfType [PSCustomObject]
+            $pipelines[-1] | Should -BeOfType [PSCustomObject]
         }
 
         It " should return a list of pipelines that have an ObjectType field with a value of Azure.DevOps.Pipeline" {
-            $pipelines[1].ObjectType | Should -Be "Azure.DevOps.Pipeline"
+            $pipelines[-1].ObjectType | Should -Be "Azure.DevOps.Pipeline"
         }
 
         It " should return a list of pipelines that have an ObjectName field" {
-            $pipelines[1].ObjectName | Should -Not -BeNullOrEmpty
+            $pipelines[-1].ObjectName | Should -Not -BeNullOrEmpty
         }
 
         It " The output should have results with Invoke-PSRule" {

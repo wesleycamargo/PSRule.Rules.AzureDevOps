@@ -1,9 +1,9 @@
 BeforeAll {
-    $rootPath = $PWD;
-    Import-Module -Name (Join-Path -Path $rootPath -ChildPath '/src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1') -Force;
+    $rootPath = Split-Path -Path $PSScriptRoot -Parent;
+    Import-Module -Name (Join-Path -Path $rootPath -ChildPath 'src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1') -Force;
 }
 
-Describe "Functions: DevOps.Tasks.VariableGroups.Tests" {
+Describe "Functions: DevOps.Tasks.VariableGroups.Tests" -Tag 'Integration' {
     Context ' Get-AzDevOpsVariableGroups without a connection' {
         It ' should throw an error' {
             { 
@@ -53,8 +53,7 @@ Describe "Functions: DevOps.Tasks.VariableGroups.Tests" {
         }
 
         It ' should throw a 404 error with a wrong project and organization' {
-            Connect-AzDevOps -Organization 'wrong-org' -PAT $env:ADO_PAT
-            { Get-AzDevOpsVariableGroups -Project 'wrong-project' -ErrorAction Stop } | Should -Throw
+            { Connect-AzDevOps -Organization 'wrong-org' -PAT $env:ADO_PAT; Get-AzDevOpsVariableGroups -Project 'wrong-project' -ErrorAction Stop } | Should -Throw
         }
     }
 
@@ -74,8 +73,7 @@ Describe "Functions: DevOps.Tasks.VariableGroups.Tests" {
         }
 
         It ' should throw a 404 error with a wrong project and organization' {
-            Connect-AzDevOps -Organization 'wrong-org' -PAT $env:ADO_PAT
-            { Get-AzDevOpsVariableGroupAcls -ProjectId 'wrong-project' -VariableGroupId 1 -ErrorAction Stop } | Should -Throw
+            { Connect-AzDevOps -Organization 'wrong-org' -PAT $env:ADO_PAT; Get-AzDevOpsVariableGroupAcls -ProjectId 'wrong-project' -VariableGroupId 1 -ErrorAction Stop } | Should -Throw
         }
     }
 

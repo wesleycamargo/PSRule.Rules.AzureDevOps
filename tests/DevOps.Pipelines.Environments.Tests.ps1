@@ -1,9 +1,9 @@
 BeforeAll {
-    $rootPath = $PWD
-    Import-Module -Name (Join-Path -Path $rootPath -ChildPath '/src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1') -Force
+    $rootPath = Split-Path -Path $PSScriptRoot -Parent
+    Import-Module -Name (Join-Path -Path $rootPath -ChildPath 'src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1') -Force
 }
 
-Describe "Functions: Azure.DevOps.Pipelines.Environments.Tests" {
+Describe "Functions: Azure.DevOps.Pipelines.Environments.Tests" -Tag 'Integration' {
     Context " Get-AzDevOpsEnvironments without a connection" {
         It " should throw an error" {
             { 
@@ -59,8 +59,7 @@ Describe "Functions: Azure.DevOps.Pipelines.Environments.Tests" {
         }
 
         It " should throw a 404 error with a wrong project and organization" {
-            Connect-AzDevOps -Organization 'wrong-org' -PAT $env:ADO_PAT
-            { Get-AzDevOpsEnvironments -Project "wrong-project" } | Should -Throw
+            { Connect-AzDevOps -Organization 'wrong-org' -PAT $env:ADO_PAT; Get-AzDevOpsEnvironments -Project "wrong-project" } | Should -Throw
         }
     }
 
@@ -137,8 +136,7 @@ Describe "Functions: Azure.DevOps.Pipelines.Environments.Tests" {
         }
 
         It " should throw a 404 error with a wrong project and organization" {
-            Connect-AzDevOps -Organization 'wrong-org' -PAT $env:ADO_PAT
-            { Get-AzDevOpsEnvironmentChecks -Project "wrong-project" -Environment "test" } | Should -Throw
+            { Connect-AzDevOps -Organization 'wrong-org' -PAT $env:ADO_PAT; Get-AzDevOpsEnvironmentChecks -Project "wrong-project" -Environment "test" } | Should -Throw
         }
 
         AfterAll {
@@ -206,8 +204,7 @@ Describe "Functions: Azure.DevOps.Pipelines.Environments.Tests" {
         }
 
         It " should throw a 404 error with a wrong project and organization" {
-            Connect-AzDevOps -Organization 'wrong-org' -PAT $env:ADO_PAT
-            { Get-AzDevOpsEnvironmentAcls -ProjectId "wrong-project" -EnvironmentId "test" } | Should -Throw
+            { Connect-AzDevOps -Organization 'wrong-org' -PAT $env:ADO_PAT; Get-AzDevOpsEnvironmentAcls -ProjectId "wrong-project" -EnvironmentId "test" } | Should -Throw
         }
 
         AfterAll {

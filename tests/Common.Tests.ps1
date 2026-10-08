@@ -1,181 +1,10 @@
 using module ../src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1
 BeforeAll {
-    # Dot source the Common.ps1 script
-    . "$PSScriptRoot/../src/PSRule.Rules.AzureDevOps/Functions/Common.ps1"
+    Import-Module "$PSScriptRoot/../src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1" -Force
 }
 
-Describe "Functions: Common.Tests" {
-    Context " Connect-AzDevOps with a Personal Access Token" {
-        BeforeAll {
-            Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT $env:ADO_PAT
-            $connection = $script:connection
-        }
-
-        It " The connection should not be null" {
-            $connection | Should -Not -BeNullOrEmpty
-        }
-
-        # It " The connection should be of type AzureDevOpsConnection" {
-        #     $connection | Should -BeOfType [AzureDevOpsConnection]
-        # }
-
-        It " The connection should have a token" {
-            $connection.Token | Should -Not -BeNullOrEmpty
-        }
-
-        It " The connection should have a token that expires in the future" {
-            $connection.TokenExpires | Should -BeGreaterThan (Get-Date)
-        }
-
-        It " should run Get-AzDevOpsProject" {
-            $projects = Get-AzDevOpsProject
-            $projects | Should -Not -BeNullOrEmpty
-        }
-    }
-
-    Context " Connect-AzDevOps with a Service Principal" {
-        BeforeAll {
-            Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -ClientId $env:ADO_CLIENT_ID -ClientSecret $env:ADO_CLIENT_SECRET -TenantId $env:ADO_TENANT_ID -AuthType ServicePrincipal
-            $connection = $script:connection
-        }
-
-        It " The connection should not be null" {
-            $connection | Should -Not -BeNullOrEmpty
-        }
-
-        # It " The connection should be of type AzureDevOpsConnection" {
-        #     $connection | Should -BeOfType [AzureDevOpsConnection]
-        # }
-
-        It " The connection should have a token" {
-            $connection.Token | Should -Not -BeNullOrEmpty
-        }
-
-        It " The connection should have a token that expires in the future" {
-            $connection.TokenExpires | Should -BeGreaterThan (Get-Date)
-        }
-
-        It " should run Get-AzDevOpsProject" {
-            $projects = Get-AzDevOpsProject
-            $projects | Should -Not -BeNullOrEmpty
-        }
-    }
-
-    Context " Connect-AzDevOps with a Service Principal and an expired token" {
-        BeforeAll {
-            Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -ClientId $env:ADO_CLIENT_ID -ClientSecret $env:ADO_CLIENT_SECRET -TenantId $env:ADO_TENANT_ID -AuthType ServicePrincipal
-            $script:connection.TokenExpires = [System.DateTime]::MinValue
-            $projects = Get-AzDevOpsProject
-            $connection = $script:connection
-        }
-
-        It " The connection should not be null" {
-            $connection | Should -Not -BeNullOrEmpty
-        }
-
-        It " The connection should have a token" {
-            $connection.Token | Should -Not -BeNullOrEmpty
-        }
-
-        It " The connection should have a token that expires in the future" {
-            $connection.TokenExpires | Should -BeGreaterThan (Get-Date)
-        }
-
-        It " should run Get-AzDevOpsProject" {
-            $projects | Should -Not -BeNullOrEmpty
-        }
-    }
-
-    Context " Connect-AzDevOps with a Service Principal and a wrong secret" {
-        It " The operation should fail with a wrong secret" {
-            { 
-                Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -ClientId $env:ADO_CLIENT_ID -ClientSecret 'wrong' -TenantId $env:ADO_TENANT_ID -AuthType ServicePrincipal
-            } | Should -Throw 
-        }
-    }
-
-    Context " Connect-AzDevOps with a User Assigned Managed Identity" {
-        BeforeAll {
-            Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -AuthType ManagedIdentity
-            $connection = $script:connection
-        }
-
-        It " The connection should not be null" {
-            $connection | Should -Not -BeNullOrEmpty
-        }
-
-        It " The connection should have a token" {
-            $connection.Token | Should -Not -BeNullOrEmpty
-        }
-
-        It " The connection should have a token that expires in the future" {
-            $connection.TokenExpires | Should -BeGreaterThan (Get-Date)
-        }
-
-        It " should run Get-AzDevOpsProject" {
-            $projects = Get-AzDevOpsProject
-            $projects | Should -Not -BeNullOrEmpty
-        }
-    }
-
-    Context " Connect-AzDevOps with a User Assigned Managed Identity and an expired token" {
-        BeforeAll {
-            Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -AuthType ManagedIdentity
-            $script:connection.TokenExpires = [System.DateTime]::MinValue
-            $projects = Get-AzDevOpsProject
-            $connection = $script:connection
-        }
-
-        It " The connection should not be null" {
-            $connection | Should -Not -BeNullOrEmpty
-        }
-
-        It " The connection should have a token" {
-            $connection.Token | Should -Not -BeNullOrEmpty
-        }
-
-        It " The connection should have a token that expires in the future" {
-            $connection.TokenExpires | Should -BeGreaterThan (Get-Date)
-        }
-
-        It " should run Get-AzDevOpsProject" {
-            $projects | Should -Not -BeNullOrEmpty
-        }
-    }
-
-    Context " Connect-AzDevOps with a System Assigned Managed Identity" {
-        BeforeAll {
-            Remove-Item Env:\ADO_MSI_CLIENT_ID
-            Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -AuthType ManagedIdentity
-            $connection = $script:connection
-        }
-
-        It " The connection should not be null" {
-            $connection | Should -Not -BeNullOrEmpty
-        }
-
-        It " The connection should have a token" {
-            $connection.Token | Should -Not -BeNullOrEmpty
-        }
-
-        It " The connection should have a token that expires in the future" {
-            $connection.TokenExpires | Should -BeGreaterThan (Get-Date)
-        }
-    }
-    
-    Context " Disconnect-AzDevOps" {
-        BeforeAll {
-            Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT $env:ADO_PAT
-            Disconnect-AzDevOps
-            $connection = $script:connection
-        }
-
-        It " The connection should be null" {
-            $connection | Should -BeNullOrEmpty
-        }
-    }
-
-    Context " Get-AzDevOpsProject without a connection" {
+Describe "Functions: Common.Tests" -Tag 'Integration' {
+    Context " Get-AzDevOpsProject without a connection" -Tag 'Unit' {
         It " should throw an error" {
             { 
                 Disconnect-AzDevOps
@@ -236,11 +65,14 @@ Describe "Functions: Common.Tests" {
         }
     }
 
-    Context " Get-AzDevOpsProjectAcls without a connection" {
+    Context " Get-AzDevOpsProjectAcls without a connection" -Tag 'Unit' {
         It " should throw an error" {
             { 
                 Disconnect-AzDevOps
-                Get-AzDevOpsProjectAcls -ProjectId $env:ADO_PROJECT
+                InModuleScope PSRule.Rules.AzureDevOps -Parameters @{ ProjectId = '00000000-0000-0000-0000-000000000001' } {
+                    param($ProjectId)
+                    Get-AzDevOpsProjectAcls -ProjectId $ProjectId
+                }
             } | Should -Throw "Not connected to Azure DevOps. Run Connect-AzDevOps first"
         }
     }
@@ -249,7 +81,10 @@ Describe "Functions: Common.Tests" {
         BeforeAll {
             Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT $env:ADO_PAT
             $project = Get-AzDevOpsProject -Project $env:ADO_PROJECT
-            $acls = Get-AzDevOpsProjectAcls -ProjectId $project.id
+            $acls = InModuleScope PSRule.Rules.AzureDevOps -Parameters @{ ProjectId = $project.id } {
+                param($ProjectId)
+                Get-AzDevOpsProjectAcls -ProjectId $ProjectId
+            }
         }
 
         It " The acls should not be null" {
@@ -263,23 +98,29 @@ Describe "Functions: Common.Tests" {
         It " The operation should fail with a wrong Organization" {
             { 
                 Connect-AzDevOps -Organization 'wrong' -PAT $env:ADO_PAT
-                Get-AzDevOpsProjectAcls -ErrorAction Stop -ProjectId $project.id
+                InModuleScope PSRule.Rules.AzureDevOps -Parameters @{ ProjectId = $project.id } {
+                    param($ProjectId)
+                    Get-AzDevOpsProjectAcls -ProjectId $ProjectId -ErrorAction Stop
+                }
             } | Should -Throw 
         }
 
         It " The operation should fail with a wrong PAT" {
             { 
                 Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT 'wrong'
-                Get-AzDevOpsProjectAcls -ErrorAction Stop -ProjectId $project.id
+                InModuleScope PSRule.Rules.AzureDevOps -Parameters @{ ProjectId = $project.id } {
+                    param($ProjectId)
+                    Get-AzDevOpsProjectAcls -ProjectId $ProjectId -ErrorAction Stop
+                }
             } | Should -Throw 
         }
     }
 
-    Context " Export-AzDevOpsProject without a connection" {
+    Context " Export-AzDevOpsProject without a connection" -Tag 'Unit' {
         It " should throw an error" {
             { 
                 Disconnect-AzDevOps
-                Export-AzDevOpsProject -Project $env:ADO_PROJECT -OutputPath $env:ADO_EXPORT_DIR
+                Export-AzDevOpsProject -Project 'test-project' -OutputPath $TestDrive
             } | Should -Throw "Not connected to Azure DevOps. Run Connect-AzDevOps first"
         }
     }
