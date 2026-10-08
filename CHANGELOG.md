@@ -8,3 +8,19 @@
 
 - Enhanced error handling to allow the export process to continue even if individual export steps fail.
 - Logging messages now provide clearer and more structured feedback during execution.
+
+### Fixed
+
+- `Export-AzDevOpsRuleData` no longer requires `-Organization` and `-OrganizationId`; both default to the connection, and an explicit `-OrganizationId` is now used instead of being discarded.
+- `Connect-AzDevOps -AccessToken` no longer requires `-OrganizationId`.
+- The organization readers (`Read-AdoOrganizationPipelinesSettings`, `-GeneralOverview`, `-SecurityPolicies`, `-GeneralBillingSettings`) accept a bare access token as well as a full `Bearer` header value.
+- `Get-AzDevOpsPipelineYaml` throws on authentication failures instead of returning nothing, and no longer returns an HTML sign-in page as pipeline YAML.
+- `Export-AdoOrganizationPipelinesSettings` uses the same "not connected" message as the other collectors.
+- The `Baseline.PublicProject` baseline also excludes `Azure.DevOps.Organization.Pipelines.Settings.DisableAnonymousBadgeAccess`.
+
+### Testing
+
+- `tests/Run-Tests.ps1` selects `Unit`, `Integration`, or `Authentication` tests and fills missing `ADO_*` variables from the Azure CLI login for live runs.
+- Live authentication tests moved to `tests/Authentication.Tests.ps1`.
+- `tests/Initialize-IntegrationTestData.ps1` creates the Azure DevOps test data the Integration tests expect.
+- The dev container image installs the pinned Pester and PSRule versions, and `.vscode/launch.json` has one entry per test type.

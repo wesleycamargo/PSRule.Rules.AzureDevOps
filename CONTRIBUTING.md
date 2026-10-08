@@ -163,6 +163,12 @@ coverage. All tests should be passing before a Pull Request is created. The proj
 will also check the code coverage and test results before merging. Make sure rule tests
 include both a positive and negative test.
 
+Run the tests with `./tests/Run-Tests.ps1 -TestType Unit`. `Unit` tests run offline.
+`Integration` and `Authentication` tests call Azure DevOps; when `ADO_*` variables are
+not set, the runner takes them from your `az login` session. Integration tests also need
+the test data created by `tests/Initialize-IntegrationTestData.ps1`. The pinned tool
+versions are in `tests/requirements.psd1`.
+
 ### Improving The Documentation
 <!-- TODO
 Updating, improving and correcting the documentation

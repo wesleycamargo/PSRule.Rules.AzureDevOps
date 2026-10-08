@@ -391,6 +391,11 @@ in building the ruleset for this module.
 - [Azure.DevOps.Organization.Security.Policies.DisallowAnonymousAccess](src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Organization.Security.Policies.DisallowAnonymousAccess.md)  
 - [Azure.DevOps.Organization.Security.Policies.DisallowAadGuestUserAccess](src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Organization.Security.Policies.DisallowAadGuestUserAccess.md)  
 
+## Improvement backlog
+
+See the [assessment tool improvement backlog](docs/assessment-backlog.md)
+for proposed priorities, acceptance criteria, and validation steps.
+
 ## Contributing
 
 This project welcomes contributions and suggestions. Please read
