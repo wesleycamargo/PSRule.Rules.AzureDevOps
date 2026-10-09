@@ -24,6 +24,7 @@ function Get-AzDevOpsEnvironments {
     $TokenType = $script:connection.TokenType
     # If token type is ReadOnly, write a warning and exit the function returing null
     if($TokenType -eq 'ReadOnly') {
+        Set-AzDevOpsCollectionStatus -Status Unavailable -ReasonCode PermissionDenied
         Write-Warning "Token type ReadOnly does not have access to Azure DevOps Pipelines Environments"
         return $null
     } else {
@@ -43,6 +44,7 @@ function Get-AzDevOpsEnvironments {
         catch {
             throw $_.Exception.Message
         }
+        Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value'
         $environments = $response.value
         return $environments
     }
@@ -87,6 +89,7 @@ function Get-AzDevOpsEnvironmentChecks {
     $TokenType = $script:connection.TokenType
     # If token type is ReadOnly, write a warning and exit the function returing null
     if($TokenType -eq 'ReadOnly') {
+        Set-AzDevOpsCollectionStatus -Status Unavailable -ReasonCode PermissionDenied
         Write-Warning "Token type ReadOnly does not have access to Azure DevOps Pipelines Environments"
         return $null
     } else {
@@ -105,6 +108,7 @@ function Get-AzDevOpsEnvironmentChecks {
         catch {
             throw $_.Exception.Message
         }
+        Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value' -Partial
         $checks = $response.value
         if($null -eq $checks) {
             return @()
@@ -152,6 +156,7 @@ function Get-AzDevOpsEnvironmentAcls {
     $TokenType = $script:connection.TokenType
     # If token type is ReadOnly, write a warning and exit the function returing null
     if($TokenType -eq 'ReadOnly') {
+        Set-AzDevOpsCollectionStatus -Status Unavailable -ReasonCode PermissionDenied
         Write-Warning "Token type ReadOnly does not have access to Azure DevOps Pipelines Environments"
         return $null
     } else {
@@ -170,6 +175,7 @@ function Get-AzDevOpsEnvironmentAcls {
         catch {
             throw $_.Exception.Message
         }
+        Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value' -Partial
         $acls = @($response.value)
         return $acls
     }
@@ -216,10 +222,14 @@ function Export-AzDevOpsEnvironmentChecks {
     $TokenType = $script:connection.TokenType
     # If token type is ReadOnly, write a warning and exit the function returing null
     if($TokenType -eq 'ReadOnly') {
+        Set-AzDevOpsCollectionStatus -Status Unavailable -ReasonCode PermissionDenied
         Write-Warning "Token type ReadOnly does not have access to Azure DevOps Pipelines Environments"
         return $null
     } else {
         $environments = Get-AzDevOpsEnvironments -Project $Project
+        if ($null -eq $environments -or @($environments).Count -eq 0) {
+            Set-AzDevOpsCollectionStatus -Status Empty -ReasonCode EmptyCollection
+        }
         $environments | ForEach-Object {
             if($null -ne $_) {
                 $environment = $_

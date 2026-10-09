@@ -40,6 +40,7 @@ function Get-AzDevOpsPipelines {
     }
     # walk through all pipelines and get the pipeline details
     $pipelines = @()
+    Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value'
     foreach ($pipeline in $response.value) {
         Write-Verbose "Getting pipeline details for $($pipeline.id)"
         Write-Verbose "Getting pipeline details from $uri"
@@ -90,6 +91,7 @@ function Get-AzDevOpsPipelineAcls {
     # If Token Type is ReadOnly, write a warning and exit the function returning null
     if ($TokenType -eq 'ReadOnly') {
         Write-Warning "Token Type is set to ReadOnly, no pipeline ACLs will be returned"
+        Set-AzDevOpsCollectionStatus -Status Partial -ReasonCode PermissionDenied
         return $null
     } else {
         $header = $script:connection.GetHeader()
@@ -111,6 +113,7 @@ function Get-AzDevOpsPipelineAcls {
         catch {
             throw $_.Exception.Message
         }
+        Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value' -Partial
         return $response.value
     }
 }
@@ -196,6 +199,7 @@ function Get-AzDevOpsPipelineYaml {
         }
         catch {
             Write-Warning "Getting raw YAML definition from default branch failed, pipeline YAML definition will be empty"
+            Set-AzDevOpsCollectionStatus -Status Partial -ReasonCode YamlUnavailable
             $response = $null
         }
         $yaml = $response
@@ -264,6 +268,7 @@ function Export-AzDevOpsPipelineYaml {
     $yamlTemp = Get-AzDevOpsPipelineYaml -Project $Project -PipelineId $PipelineId
     # Export the YAML definition to a file if it is not empty
     if ($null -eq $yamlTemp) {
+        Set-AzDevOpsCollectionStatus -Status Partial -ReasonCode YamlUnavailable
         Write-Warning "YAML definition for pipeline $PipelineId is empty"
         return $null
     } else {
@@ -317,6 +322,9 @@ function Export-AzDevOpsPipelines {
     $TokenType = $script:connection.TokenType
     Write-Verbose "Getting pipelines from Azure DevOps"
     $pipelines = Get-AzDevOpsPipelines -Project $Project
+    if ($null -eq $pipelines -or @($pipelines).Count -eq 0) {
+        Set-AzDevOpsCollectionStatus -Status Empty -ReasonCode EmptyCollection
+    }
     # Loop through all pipelines
     foreach ($pipeline in $pipelines) {
         # Add ObjectType Azure.DevOps.Pipeline to the pipeline object
@@ -347,6 +355,7 @@ function Export-AzDevOpsPipelines {
             }
             $pipeline | Add-Member -MemberType NoteProperty -Name Acls -Value (Get-AzDevOpsPipelineAcls -ProjectId $ProjectId -PipelineId $pipelineId -Folder $Folder)
         } else {
+            Set-AzDevOpsCollectionStatus -Status Partial -ReasonCode PermissionDenied
             Write-Verbose "Token Type is set to ReadOnly, no pipeline ACLs will be returned"
         }
         If ($PassThru) {

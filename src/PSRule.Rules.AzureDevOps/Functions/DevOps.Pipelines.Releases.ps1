@@ -37,6 +37,7 @@ Function Get-AzDevOpsReleaseDefinitions {
     catch {
         throw $_.Exception.Message
     }
+    Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value'
     return @($response.value)
 }
 Export-ModuleMember -Function Get-AzDevOpsReleaseDefinitions
@@ -80,6 +81,7 @@ Function Get-AzDevOpsReleaseDefinitionAcls {
     $Organization = $script:connection.Organization
     # IF token type is ReadOnly, write a warning and exit the function returing null
     if ($TokenType -eq 'ReadOnly') {
+        Set-AzDevOpsCollectionStatus -Status Partial -ReasonCode PermissionDenied
         Write-Warning "The ReadOnly token type is not supported for this function"
         return $null
     } else {
@@ -104,7 +106,8 @@ Function Get-AzDevOpsReleaseDefinitionAcls {
         catch {
             throw $_.Exception.Message
         }
-        return $response.value
+        Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value' -Partial
+    return $response.value
     }
 }
 Export-ModuleMember -Function Get-AzDevOpsReleaseDefinitionAcls
@@ -147,6 +150,9 @@ Function Export-AzDevOpsReleaseDefinitions {
     $TokenType = $script:connection.TokenType
     $Organization = $script:connection.Organization
     $definitions = Get-AzDevOpsReleaseDefinitions -Project $Project
+    if ($null -eq $definitions -or @($definitions).Count -eq 0) {
+        Set-AzDevOpsCollectionStatus -Status Empty -ReasonCode EmptyCollection
+    }
     foreach ($definition in $definitions) {
         if ($null -ne $definition.id) {
             $definitionId = $definition.id
@@ -191,6 +197,7 @@ Function Export-AzDevOpsReleaseDefinitions {
                 # Add the ACLs to the response
                 $response | Add-Member -MemberType NoteProperty -Name 'Acls' -Value $acls
             } else {
+                Set-AzDevOpsCollectionStatus -Status Partial -ReasonCode PermissionDenied
                 Write-Warning "The ReadOnly token type is not supported for ACL export"
             }
             # If the PassThru switch is set, return the response object

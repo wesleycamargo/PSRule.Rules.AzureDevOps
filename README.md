@@ -38,6 +38,10 @@ to Azure Monitor.
 
 ## Usage
 
+Use [assessment collection completeness](docs/assessment-completeness.md) to check
+collection coverage before evaluating rules, including strict exports and separate
+JSON completeness reports.
+
 To use this module, you need to have _PSRule_ installed.
 You can install it from the PowerShell Gallery:
 

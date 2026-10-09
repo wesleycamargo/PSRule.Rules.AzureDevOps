@@ -36,6 +36,7 @@ Function Get-AzDevOpsVariableGroups {
     catch {
         throw $_.Exception.Message
     }
+    Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value'
     return @($response.value)
 }
 Export-ModuleMember -Function Get-AzDevOpsVariableGroups
@@ -84,6 +85,7 @@ function Get-AzDevOpsVariableGroupAcls {
     catch {
         throw $_.Exception.Message
     }
+    Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value' -Partial
     return @($response.value)
 }
 Export-ModuleMember -Function Get-AzDevOpsVariableGroupAcls
@@ -133,6 +135,9 @@ Function Export-AzDevOpsVariableGroups {
     $Organization = $script:connection.Organization
     $ProjectId = (Get-AzDevOpsProject -Project $Project).id
     $variableGroups = Get-AzDevOpsVariableGroups -Project $Project
+    if ($null -eq $variableGroups -or @($variableGroups).Count -eq 0) {
+        Set-AzDevOpsCollectionStatus -Status Empty -ReasonCode EmptyCollection
+    }
     $variableGroups | ForEach-Object {
         $variableGroup = $_
         $variableGroup | Add-Member -MemberType NoteProperty -Name 'ObjectType' -Value 'Azure.DevOps.Tasks.VariableGroup'

@@ -77,6 +77,11 @@ function Export-AzDevOpsPipelinesSettings {
     }
     Write-Verbose "Getting pipelines settings from Azure DevOps"
     $pipelinesSettings = Get-AzDevOpsPipelinesSettings -Project $Project
+    Set-AzDevOpsMissingCollectionData -Data $pipelinesSettings -RequiredProperties @(
+        'enforceSettableVar', 'enforceJobAuthScope', 'enforceJobAuthScopeForReleases',
+        'enforceReferencedRepoScopedToken', 'isCommentRequiredForPullRequest',
+        'enforceNoAccessToSecretsFromForks', 'enableShellTasksArgsSanitizing', 'statusBadgesArePrivate'
+    )
     $pipelinesSettings | Add-Member -MemberType NoteProperty -Name ObjectType -Value 'Azure.DevOps.Pipelines.Settings'
     $pipelinesSettings | Add-Member -MemberType NoteProperty -Name ObjectName -Value ("{0}.{1}.PipelineSettings" -f $script:connection.Organization,$Project)
     $pipelinesSettings | Add-Member -MemberType NoteProperty -Name Name -Value "PipelineSettings"

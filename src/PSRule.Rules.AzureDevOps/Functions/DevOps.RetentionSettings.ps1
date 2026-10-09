@@ -40,6 +40,10 @@ Function Get-AzDevOpsRetentionSettings {
     catch {
         throw "Failed to get retention settings for project '$($Project)' from Azure DevOps"
     }
+    Set-AzDevOpsMissingCollectionData -Data $settingsResponse -RequiredProperties @('purgeArtifacts', 'purgePullRequestRuns')
+    Set-AzDevOpsMissingCollectionData -Data $settingsResponse.purgeArtifacts -RequiredProperties 'value' -Partial
+    Set-AzDevOpsMissingCollectionData -Data $settingsResponse.purgePullRequestRuns -RequiredProperties 'value' -Partial
+    Set-AzDevOpsMissingCollectionData -Data $policyResponse
     return @{
         RetentionSettings = $settingsResponse
         RetentionPolicy = $policyResponse

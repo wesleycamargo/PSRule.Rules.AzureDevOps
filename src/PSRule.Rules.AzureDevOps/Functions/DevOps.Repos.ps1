@@ -37,6 +37,7 @@ Function Get-AzDevOpsRepos {
     catch {
         throw $_.Exception.Message
     }
+    Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value'
     return @($response.value)
 }
 Export-ModuleMember -Function Get-AzDevOpsRepos
@@ -94,11 +95,13 @@ Function Get-AzDevOpsBranches {
     catch {
         $statsResponse = $null
     }
+    Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value' -Partial
     $result = @($response.value | ForEach-Object {
         $branch = $_
         If($null -eq $statsResponse) {
             $branchStats = $null
         } else {
+            Set-AzDevOpsMissingCollectionData -Data $statsResponse -RequiredProperties 'value' -Partial
             $branchStats = $statsResponse.value | Where-Object {$_.name -eq ($branch.name -replace "refs/heads/","")}
         }
         $branch | Add-Member -MemberType NoteProperty -Name Stats -Value $branchStats
@@ -163,6 +166,7 @@ Function Get-AzDevOpsBranchPolicy {
     catch {
         throw $_.Exception.Message
     }
+    Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value' -Partial
     $branchPolicy = @($response.value | Where-Object {$_.settings.scope.refName -eq $Branch -and $_.settings.scope.repositoryId -eq $Repository})
 
     return $branchPolicy
@@ -252,6 +256,7 @@ Function Get-AzDevOpsRepositoryAcls {
     $TokenType = $script:connection.TokenType
     # If the token type is ReadOnly, write a warning and return null
     if ($TokenType -eq "ReadOnly") {
+        Set-AzDevOpsCollectionStatus -Status Partial -ReasonCode PermissionDenied
         Write-Warning "The ReadOnly token type does not have access to the Repositories ACLs API, returning null"
         return $null
     } else {
@@ -263,6 +268,7 @@ Function Get-AzDevOpsRepositoryAcls {
             if ($response -is [string]) {
                 throw "Authentication failed or project not found"
             }
+            Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value' -Partial
             $thisRepoPerms = $response.value
         }
         catch {
@@ -363,6 +369,7 @@ Function Get-AzDevOpsRepositoryGhas {
     $Organization = $script:connection.Organization
     # token is not FullAccess, write a warning and return null
     if ($TokenType -ne "FullAccess") {
+        Set-AzDevOpsCollectionStatus -Status Partial -ReasonCode PermissionDenied
         Write-Warning "The $TokenType token type does not have access to the Repositories API, returning null"
         return $null
     } else {
@@ -390,6 +397,7 @@ Function Get-AzDevOpsRepositoryGhas {
         catch {
             throw $_.Exception.Message
         }
+        Set-AzDevOpsMissingCollectionData -Data $response.dataProviders.'ms.vss-advsec.advanced-security-enablement-data-provider' -Partial
         return $response.dataProviders.'ms.vss-advsec.advanced-security-enablement-data-provider'
     }
 }
@@ -437,6 +445,9 @@ function Export-AzDevOpsReposAndBranchPolicies {
     $Organization = $script:connection.Organization
     $TokenType = $script:connection.TokenType    
     $repos = Get-AzDevOpsRepos -Project $Project
+    if ($null -eq $repos -or @($repos).Count -eq 0) {
+        Set-AzDevOpsCollectionStatus -Status Empty -ReasonCode EmptyCollection
+    }
     $repos | ForEach-Object {
         if ($null -ne $_) {
             $repo = $_
@@ -490,6 +501,7 @@ function Export-AzDevOpsReposAndBranchPolicies {
                 $ghas = Get-AzDevOpsRepositoryGhas -ProjectId $repo.project.id -RepositoryId $repo.id
                 $repo | Add-Member -MemberType NoteProperty -Name Ghas -Value $ghas
             } else {
+                Set-AzDevOpsCollectionStatus -Status Partial -ReasonCode PermissionDenied
                 Write-Warning "The $TokenType token type does not have access to the GHAS API, returning null"
             }
             
@@ -508,6 +520,8 @@ function Export-AzDevOpsReposAndBranchPolicies {
             if ($TokenType -ne "ReadOnly") {
                 $repoAcls = Get-AzDevOpsRepositoryAcls -ProjectId $repo.project.id -RepositoryId $repoId
                 $repo | Add-Member -MemberType NoteProperty -Name Acls -Value $repoAcls
+            } else {
+                Set-AzDevOpsCollectionStatus -Status Partial -ReasonCode PermissionDenied
             }
             $branches += $repo
             # If the PassThru switch is set, return the repo object

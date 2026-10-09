@@ -76,6 +76,16 @@ function Read-AdoOrganizationPipelinesSettings {
         # Parse response
         $response = $rawResponse.Content | ConvertFrom-Json
         $settings = $response.dataProviders.'ms.vss-build-web.pipelines-org-settings-data-provider'
+        Set-AzDevOpsMissingCollectionData -Data $settings -RequiredProperties @(
+            'statusBadgesArePrivate', 'enforceSettableVar', 'enforceJobAuthScope', 'enforceJobAuthScopeForReleases',
+            'enforceReferencedRepoScopedToken', 'disableStageChooser', 'disableClassicBuildPipelineCreation',
+            'disableClassicReleasePipelineCreation', 'disableInBoxTasksVar', 'disableMarketplaceTasksVar',
+            'disableNode6TasksVar', 'enableShellTasksArgsSanitizing', 'forkProtectionEnabled', 'buildsEnabledForForks',
+            'enforceJobAuthScopeForForks', 'enforceNoAccessToSecretsFromForks', 'disableImpliedYAMLCiTrigger',
+            'auditEnforceSettableVar', 'isTaskLockdownFeatureEnabled', 'hasManagePipelinePoliciesPermission',
+            'isCommentRequiredForPullRequest', 'requireCommentsForNonTeamMembersOnly',
+            'requireCommentsForNonTeamMemberAndNonContributors', 'enableShellTasksArgsSanitizingAudit'
+        )
 
         # Output settings to console (optional, retained for debugging)
         Write-Host ""
@@ -196,7 +206,12 @@ function Export-AdoOrganizationPipelinesSettings {
     try {
         $settings = Read-AdoOrganizationPipelinesSettings -Organization $Organization -AccessToken $AccessToken
         if ($null -eq $settings) {
-            Write-Error "No Organization pipeline settings returned from Read-AdoOrganizationPipelinesSettings."
+            if ($null -eq $script:collectionStatus) {
+                Write-Error "No Organization pipeline settings returned from Read-AdoOrganizationPipelinesSettings."
+            } else {
+                Set-AzDevOpsCollectionStatus -Status Unavailable -ReasonCode MissingRequiredData
+                return
+            }
         }
     }
     catch {

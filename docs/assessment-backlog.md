@@ -1,6 +1,6 @@
 # Assessment tool improvement backlog
 
-Review date: 2026-10-06. Status: ADO-010 is **In progress**, ADO-011 is **Completed**; other items are **Proposed**.
+Review date: 2026-10-09. Status: ADO-001 and ADO-011 are **Completed**, ADO-010 is **In progress**; other items are **Proposed**.
 
 This backlog records improvements from a source review of the assessment tool.
 It covers assessment reliability, rule correctness, authentication, API collection,
@@ -18,7 +18,7 @@ correctness and reliability, and P2 improves reproducibility and usability.
 
 | ID | Priority | Improvement | Dependencies | Status |
 | --- | --- | --- | --- | --- |
-| ADO-001 | P0 | Make assessment completeness explicit | None | Proposed |
+| ADO-001 | P0 | Make assessment completeness explicit | None | Completed |
 | ADO-002 | P1 | Establish deterministic assessment tests | None | Proposed |
 | ADO-003 | P1 | Correct production rule applicability | ADO-002 | Proposed |
 | ADO-004 | P1 | Improve secret detection precision | ADO-002 | Proposed |
@@ -48,7 +48,22 @@ organization readers, and HTML detection for raw pipeline YAML, covered by
 
 ## ADO-001 — Make assessment completeness explicit
 
-**Priority:** P0. **Status:** Proposed. **Dependencies:** None.
+**Priority:** P0. **Status:** Completed. **Dependencies:** None.
+
+**Completed 2026-10-09:** Implemented on `fix/ado-001-assessment-completeness` with
+separate `-CompletenessReportPath` output and
+opt-in `-Strict` behavior for project and organization exports in an isolated
+worktree. Collector status distinguishes completed, empty, partial, unavailable,
+and failed collection; permission omissions and missing required data count as
+incomplete. Strict exports attempt all collectors/projects and write their report
+before throwing. See [assessment completeness](assessment-completeness.md).
+Validation: all 61 offline Unit tests pass, including 36 completeness scenarios;
+669 live tests were excluded. Pester command coverage across functions, classes,
+and `.psm1` is 60.28%; the completeness helpers have 98.72% coverage and the project
+export implementation has 97.20%. PowerShell parsing and `git diff --check` pass.
+Standards and requirements reviews have no remaining blockers. Aggregate failure
+diagnostics use safe messages; missing enrichment remains partial coverage while
+legitimate empty collections, false/zero values, and nullable settings are preserved.
 
 **Problem and evidence:** Confirmed: the [export orchestrator](../src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psm1)
 catches collector errors and continues. Its failure accumulator starts as `$null`
@@ -449,8 +464,8 @@ coverage inventory separately from function/class code coverage under ADO-008.
 
 ## Delivery order and completion
 
-Start ADO-001 and ADO-002. Repair test setup/contracts (ADO-010) and assertions
-(ADO-011) early, and prioritize ADO-008's confirmed CI failure propagation gap.
+ADO-001 and ADO-011 are complete. Continue ADO-002 and remaining test setup/contracts
+(ADO-010), and prioritize ADO-008's confirmed CI failure propagation gap.
 Then address rule correctness, rule coverage, and collection reliability.
 Complete CI and user guidance after their dependencies. Implement each item in a
 focused change with the relevant tests and any required localized help updates.

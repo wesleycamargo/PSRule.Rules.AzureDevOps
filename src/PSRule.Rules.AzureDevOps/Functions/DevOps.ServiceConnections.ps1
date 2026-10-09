@@ -36,6 +36,7 @@ function Get-AzDevOpsServiceConnections {
     }
 
     $response = Invoke-RestMethod -Uri $uri -Method Get -Headers $header
+    Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value'
     return $response.value
 }
 Export-ModuleMember -Function Get-AzDevOpsServiceConnections
@@ -86,6 +87,7 @@ function Get-AzDevOpsServiceConnectionChecks {
     catch {
         throw $_.Exception.Message
     }
+    Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value' -Partial
     return $response.value
 }
 Export-ModuleMember -Function Get-AzDevOpsServiceConnectionChecks
@@ -133,6 +135,7 @@ function Get-AzDevOpsServiceConnectionAcls {
     catch {
         throw $_.Exception.Message
     }
+    Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value' -Partial
     return @($response.value)
 }
 Export-ModuleMember -Function Get-AzDevOpsServiceConnectionAcls
@@ -178,6 +181,9 @@ function Export-AzDevOpsServiceConnections {
     $Organization = $script:connection.Organization
     # Get all service connections
     $serviceConnections = Get-AzDevOpsServiceConnections -Project $Project
+    if ($null -eq $serviceConnections -or @($serviceConnections).Count -eq 0) {
+        Set-AzDevOpsCollectionStatus -Status Empty -ReasonCode EmptyCollection
+    }
     $serviceConnections | ForEach-Object {
         $serviceConnection = $_
         # Set JSON ObjectType field to Azure.DevOps.ServiceConnection

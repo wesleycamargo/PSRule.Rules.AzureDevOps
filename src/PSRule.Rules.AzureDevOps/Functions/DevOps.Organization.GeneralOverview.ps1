@@ -58,6 +58,9 @@ function Read-AdoOrganizationGeneralOverview {
 
         # Parse response
         $response = $rawResponse.Content | ConvertFrom-Json
+        Set-AzDevOpsMissingCollectionData -Data $response.fps.dataProviders.data.'ms.vss-admin-web.organization-admin-overview-data-provider' -RequiredProperties @('description', 'timeZone', 'geography', 'region') -AllowNullProperties 'description'
+        Set-AzDevOpsMissingCollectionData -Data $response.fps.dataProviders.data.'ms.vss-admin-web.organization-admin-overview-data-provider'.timeZone -RequiredProperties 'displayName' -Partial
+        Set-AzDevOpsMissingCollectionData -Data $response.fps.dataProviders.data.'ms.vss-web.page-data'.user -RequiredProperties 'displayName' -Partial
         $settings = [PSCustomObject]@{
             description = if ([string]::IsNullOrWhiteSpace($response.fps.dataProviders.data.'ms.vss-admin-web.organization-admin-overview-data-provider'.description)) { "Not Set" } else { $response.fps.dataProviders.data.'ms.vss-admin-web.organization-admin-overview-data-provider'.description }
             timeZone    = $response.fps.dataProviders.data.'ms.vss-admin-web.organization-admin-overview-data-provider'.timeZone.displayName

@@ -60,7 +60,9 @@ function Read-AdoOrganizationSecurityPolicies {
 
         # Navigate to the internal data provider
         $policyData = $response.fps.dataProviders.data.'ms.vss-admin-web.organization-policies-data-provider'
+        Set-AzDevOpsMissingCollectionData -Data $policyData -RequiredProperties 'policies'
         if ($null -eq $policyData) {
+            if ($null -ne $script:collectionStatus) { return @{} }
             throw "Policy data not found in API response."
         }
 
@@ -94,6 +96,7 @@ function Read-AdoOrganizationSecurityPolicies {
                 $p = $entry.policy
                 $name = $p.name
                 $desc = $entry.description
+                Set-AzDevOpsMissingCollectionData -Data $p -RequiredProperties @('name', 'effectiveValue')
                 $effective = [bool]$p.effectiveValue  # Ensure boolean type
 
                 Write-Host " - $desc"
@@ -114,6 +117,7 @@ function Read-AdoOrganizationSecurityPolicies {
         # Validate expected policies
         $missingPolicies = $expectedPolicies | Where-Object { $_ -notin $foundPolicies }
         if ($missingPolicies) {
+            Set-AzDevOpsCollectionStatus -Status Partial -ReasonCode MissingRequiredData
             Write-Warning "Missing expected policies in API response: $($missingPolicies -join ', ')"
         }
         else {
@@ -201,6 +205,10 @@ function Export-AdoOrganizationSecurityPolicies {
         Write-Verbose "Retrieving security policy settings for organization: $Organization"
         $settings = Read-AdoOrganizationSecurityPolicies -Organization $Organization -AccessToken $AccessToken -Verbose
         if ($null -eq $settings -or $settings.Count -eq 0) {
+            if ($null -ne $script:collectionStatus) {
+                Set-AzDevOpsCollectionStatus -Status Unavailable -ReasonCode MissingRequiredData
+                return
+            }
             throw "No organization security policy settings returned from Read-AdoOrganizationSecurityPolicies."
         }
     }

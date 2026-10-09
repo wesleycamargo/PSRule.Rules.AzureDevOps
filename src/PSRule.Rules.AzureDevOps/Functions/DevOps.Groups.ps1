@@ -38,6 +38,7 @@ Function Get-AzDevOpsGroups {
     $scopeDescriptor = (Invoke-RestMethod -Uri $uri -Method Get -Headers $header).value
     $uri = "https://vssps.dev.azure.com/$($Organization)/_apis/graph/groups?scopeDescriptor=$scopeDescriptor&api-version=7.2-preview.1"
     $response = Invoke-RestMethod -Uri $uri -Method Get -Headers $header
+    Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value'
     return $response.value
 }
 Export-ModuleMember -Function Get-AzDevOpsGroups
@@ -149,6 +150,9 @@ Function Export-AzDevOpsGroups {
     }
     try {
         $groups = Get-AzDevOpsGroups -Project $Project
+        if ($null -eq $groups -or @($groups).Count -eq 0) {
+            Set-AzDevOpsCollectionStatus -Status Empty -ReasonCode EmptyCollection
+        }
     }
     catch {
         throw "Failed to get groups from Azure DevOps"

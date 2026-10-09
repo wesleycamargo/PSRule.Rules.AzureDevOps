@@ -192,9 +192,13 @@ function Get-AzDevOpsProject {
     catch {
         throw "Failed to get projects from Azure DevOps"
     }
-    if($response.value) {
+    if ($response.PSObject.Properties.Name -contains 'value') {
         return $response.value
     } else {
+        if (-not $Project) {
+            Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value'
+            if ($null -ne $script:collectionStatus) { return }
+        }
         return $response
     }
 }
@@ -297,6 +301,7 @@ function Export-AzDevOpsProject {
     Write-Verbose "Getting project $Project for organization $Organization"
    try {
         $response = Get-AzDevOpsProject -Project $Project
+        Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties @('id', 'name')
         $response | Add-Member -MemberType NoteProperty -Name ObjectType -Value "Azure.DevOps.Project"
         $response | Add-Member -MemberType NoteProperty -Name ObjectName -Value "$Organization.$Project"
         # Add the Project Acls to the response object

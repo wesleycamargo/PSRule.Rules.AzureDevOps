@@ -54,6 +54,7 @@ function Read-AdoOrganizationGeneralBillingSettings {
         }
 
         $response = $rawResponse.Content | ConvertFrom-Json
+        Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties @('currentOrganizationName', 'subscriptionStatus', 'isEnterpriseBillingEnabled', 'isAssignmentBillingEnabled') -AllowNullProperties 'subscriptionStatus'
 
 
         [string]$subscriptionId = $null
@@ -155,7 +156,9 @@ function Export-AdoOrganizationGeneralBillingSettings {
     )
 
     $settings = Read-AdoOrganizationGeneralBillingSettings -OrganizationId $OrganizationId -AccessToken $AccessToken -ExpectedSubscriptionId $ExpectedSubscriptionId
+    Set-AzDevOpsMissingCollectionData -Data $settings
     if ($null -eq $settings) {
+        if ($null -ne $script:collectionStatus) { return }
         Write-Error "No billing settings returned from Read-AdoOrganizationGeneralBillingSettings."
         return
     }
