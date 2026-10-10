@@ -66,7 +66,7 @@ Describe 'Azure DevOps assessment pipeline' -Tag 'Unit' {
         @((Get-ChildItem $env:BUILD_ARTIFACTSTAGINGDIRECTORY).Name) | Should -Be @('collection-status.json', 'psrule-results.sarif')
     }
 
-    It 'fails incomplete collection before evaluating rules and retains its report' {
+    It 'stops incomplete assessment while allowing partial pipeline success and retaining its report' {
         $script:collectionStatus = 'Partial'
 
         { & $assessmentScript } | Should -Throw '*collection is incomplete*'
@@ -74,6 +74,18 @@ Describe 'Azure DevOps assessment pipeline' -Tag 'Unit' {
         Should -Invoke Assert-PSRule -Times 0 -Exactly
         (Get-Content (Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'collection-status.json') -Raw | ConvertFrom-Json).Status | Should -Be 'Partial'
         Test-Path (Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'psrule-results.sarif') | Should -BeFalse
+        $assessment['continueOnError'] | Should -BeTrue
+        $publish['condition'] | Should -Be 'always()'
+    }
+
+    It 'allows partial pipeline success when rule assertions fail' {
+        Mock Assert-PSRule { throw 'fixture rule assertion failure' }
+
+        { & $assessmentScript } | Should -Throw '*rule assertion failure*'
+
+        Should -Invoke Assert-PSRule -Times 1 -Exactly
+        (Get-Content (Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'collection-status.json') -Raw | ConvertFrom-Json).Status | Should -Be 'Complete'
+        $assessment['continueOnError'] | Should -BeTrue
         $publish['condition'] | Should -Be 'always()'
     }
 

@@ -33,10 +33,10 @@ It uses strict collection completeness checks before evaluating
 exported Azure DevOps data is not published. Report publication runs even
 when collection fails.
 
-Rule violations are reported in the SARIF artifact and the job log but do not
-fail the pipeline. Incomplete collection fails the run after writing the
-completeness report and prevents rule evaluation. Authentication, export,
-and execution errors also fail the run. See
+Assessment failures mark the pipeline as **partially succeeded** through the
+assessment task's `continueOnError` setting. Incomplete collection writes the
+completeness report and prevents rule evaluation; available reports are still
+published. See
 [assessment completeness](../docs/assessment-completeness.md) for report details.
 Open the artifact with the Azure DevOps SARIF Viewer extension if installed.
 
