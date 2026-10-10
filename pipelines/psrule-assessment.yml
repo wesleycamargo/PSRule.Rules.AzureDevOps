@@ -9,7 +9,6 @@ schedules:
     branches:
       include:
         - main
-        - automation/psrule-assessment
     always: true
 
 variables:

@@ -105,7 +105,7 @@ The rule repository contains two independent entry points. Neither includes the 
 | Definition | Trigger and agent | Ordered work | Outputs and failure behavior |
 | --- | --- | --- | --- |
 | `pipelines/azure-pipelines.yml` | Push to `main`. Hosted `windows-latest`. | Install prerequisite modules. Register an Azure Artifacts feed. Publish the module source package. | Module package in Azure Artifacts. Uses `devops-assessment-vg001`. This definition contains no test stage. |
-| `pipelines/psrule-assessment.yml` | Manual, or Sunday at 02:00 UTC. Schedule includes `main` and `automation/psrule-assessment`. Self-hosted `AI-Pool`. | Install PSRule 2.9.0. Import checked-out module. Obtain a service-principal token. Export with strict completeness. Evaluate `Baseline.Default`. | `psrule-results` build artifact contains completeness JSON and SARIF when evaluation runs. Assessment uses `continueOnError`. Publication uses `always()`. Raw exports remain temporary. |
+| `pipelines/psrule-assessment.yml` | Manual, or Sunday at 02:00 UTC. Schedule includes `main`. Self-hosted `AI-Pool`. | Install PSRule 2.9.0. Import checked-out module. Obtain a service-principal token. Export with strict completeness. Evaluate `Baseline.Default`. | `psrule-results` build artifact contains completeness JSON and SARIF when evaluation runs. Assessment uses `continueOnError`. Publication uses `always()`. Raw exports remain temporary. |
 
 The dashboard repository contains three independent entry points.
 
@@ -115,8 +115,8 @@ The dashboard repository contains three independent entry points.
 | `azure-pipelines/deploy-workbooks.yml` | Manual. Push and PR triggers disabled. Self-hosted `AI-Pool`. | Use `psrule-azure`. Run `Deploy-PSRuleWorkbooks.ps1` to validate, preview, deploy, and inspect resources. | Resource-group deployment `psrule-workbooks`, five workbooks, result table, and ingestion configuration. It does not run an assessment. |
 | `azure-pipelines/publish-workbooks.yml` | Manual. Push and PR triggers disabled. Self-hosted `AI-Pool`. | Check out dashboards and rules separately. Assess the organization. Generate local reports. Ingest results. Query the workspace to check counts. | `psrule-results` artifact, Markdown run summary, and conditional `PSRule Dashboard` HTML attachment. Workbook ingestion failure can fail the run after report generation. |
 
-The manual dashboard pipeline checks out the rule repository from `automation/psrule-assessment` through `github.com_wesleycamargo`.
-It therefore does not implicitly use the latest rule changes on `main`.
+The manual dashboard pipeline checks out the rule repository from `main` through `github.com_wesleycamargo`.
+It uses the rule source on `main`.
 Its assessment script exports without `-Strict` or a completeness report.
 Available JSON can therefore reach evaluation even when collection coverage is incomplete.
 
@@ -178,7 +178,7 @@ This document does not propose replacement technologies.
 | Agent unavailable | Manual and scheduled jobs wait for capacity. | `AI-Pool` needs an online agent. The source defines no capacity objective. |
 | Artifact expiration | Run snapshots become unavailable. | Azure DevOps run retention controls artifacts. Operators must retain or download required evidence. |
 | Sensitive assessment data | Target identities and exported configuration can expose organizational information. | Restrict pipeline, artifact, variable-group, and workspace access. The legacy pipeline publishes raw exports. |
-| Package or branch drift | Different pipelines can evaluate different module versions. | Weekly assessment uses source. Manual assessment uses a named branch. Legacy assessment uses a feed package. Record versions with operational evidence. |
+| Package or branch drift | Different pipelines can evaluate different module versions. | Weekly assessment uses source. Manual assessment uses `main`. Legacy assessment uses a feed package. Record versions with operational evidence. |
 | Legacy workflow drift | Older paths can fail against the current module API. | The GitHub Monitor export call requires review before operational use. Documentation does not fix this code. |
 
 Protected variable groups and Azure service connections supply credentials for Azure pipelines.
