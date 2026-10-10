@@ -1,31 +1,41 @@
-Example Azure DevOps Pipeline
-=============================
+Azure DevOps pipelines
+======================
 
-This folder contains an example Azure DevOps Pipeline that can be used to
-validate the rules in this module against your own Azure DevOps project.
+`azure-pipelines.yml` publishes this PowerShell module to Azure Artifacts.
+`psrule-assessment.yml` is a separate, organization-wide PSRule assessment
+pipeline. It runs manually or every Sunday at 02:00 UTC on `main`.
 
-Copy the contents of this folder to your own Azure DevOps repository and
-update the `azure-pipelines.yml` file to point to your own repository using
-the variables for `devops_organization` and `devops_project`. The variable
-group `my-group` is used to store the PAT for the Azure DevOps project.
-The variable should be named `ADOPAT`.
+## Configure the assessment pipeline
 
-```yaml
-variables:
-  - group: my-group
-  - name: devops_organization
-    value: "MyOrg"
-  - name: devops_project
-    value: "MyProject"
-```
+The deployed assessment pipeline is in the
+[`PSRule.Rules.AzureDevOps` Azure DevOps project](https://dev.azure.com/ai-experiments/PSRule.Rules.AzureDevOps).
+It uses the protected Library variable group `ai-credentials`.
 
-The pipeline will run the `Export-AzDevOpsRuleData` command to export the
-data from the Azure DevOps project and then run the `Assert-PSRule` command
-to validate the rules in this module against the exported data.
+1. Configure `ai-credentials` with these service-principal values:
 
-The pipeline will fail if any of the rules fail. The output of the
-`Assert-PSRule` command will be stored as an artifact in the pipeline
-run. The results can be viewer with the Sarif Viewer extension in Azure
-DevOps. 
+   | Variable | Description |
+   | --- | --- |
+   | `Directory (tenant) ID` | Microsoft Entra tenant ID for the service principal. |
+   | `Application (client) ID` | Microsoft Entra application (client) ID. |
+   | `secret` | Service-principal client secret; mark this variable secret. |
+
+2. Grant the service principal sufficient read access to the organization and
+   each project that should be assessed.
+3. Authorize the `PSRule Azure DevOps Assessment` pipeline to use the
+   variable group. The pipeline sets `ADO_ORGANIZATION` to `ai-experiments`
+   and `ADO_ORGANIZATION_ID` to `3b022c28-683d-4d7e-87a5-bd8198332011`.
+
+The pipeline installs PSRule 2.9.0, imports the checked-out module, exports
+the organization data to the agent workspace, and evaluates
+`Baseline.Default`. It stores only `psrule-results.sarif` as the
+`psrule-results` artifact; exported Azure DevOps data is not published.
+
+Rule violations are reported in the SARIF artifact and the job log but do not
+fail the pipeline. Authentication, export, and execution errors fail the run.
+Open the artifact with the Azure DevOps SARIF Viewer extension if installed.
+
+The pipeline uses the project self-hosted `AI-Pool` rather than Microsoft-hosted
+capacity. At least one Linux agent in that pool must be online for scheduled or
+manual runs to start.
 
 ![Sarif Viewer](../assets/media/sarif-0.0.11.png)
