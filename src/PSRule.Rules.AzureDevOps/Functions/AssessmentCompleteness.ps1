@@ -77,7 +77,7 @@ function Complete-AzDevOpsAssessmentExport {
         $Report | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $CompletenessReportPath -Encoding utf8 -ErrorAction Stop
     }
     if ($Report.Status -ne 'Complete') {
-        $commands = @($records | Where-Object { $_.Status -notin 'Completed', 'Empty' } | Select-Object -ExpandProperty Command -Unique)
+        $commands = @($records | Where-Object { $_.Status -notin 'Completed', 'Empty' } | ForEach-Object { $_.Command } | Select-Object -Unique)
         $message = "Assessment collection is incomplete: $($commands -join ', ')."
         if ($Strict) { throw $message }
         Write-Warning $message

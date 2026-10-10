@@ -70,6 +70,26 @@ Describe 'Assessment collection completeness' -Tag 'Unit' {
         Should -Invoke -ModuleName PSRule.Rules.AzureDevOps Export-AdoOrganizationSecurityPolicies -Times 1 -Exactly
     }
 
+    It 'names incomplete collectors with terminating error handling for <Scope> exports' -TestCases @(
+        @{ Scope = 'project' },
+        @{ Scope = 'organization' }
+    ) {
+        param ($Scope)
+        Mock -ModuleName PSRule.Rules.AzureDevOps Export-AzDevOpsProject {
+            throw 'fixture collector failure'
+        }
+        Mock -ModuleName PSRule.Rules.AzureDevOps Get-AzDevOpsProject { [pscustomobject]@{ name = 'fixture-project' } }
+
+        $export = if ($Scope -eq 'project') { 'Export-AzDevOpsRuleData' } else { 'Export-AzDevOpsOrganizationRuleData' }
+        $parameters = @{ Organization = 'fixture-org'; OrganizationId = '11111111-1111-1111-1111-111111111111' }
+        if ($Scope -eq 'project') { $parameters.Project = 'fixture-project' }
+
+        { & $export @parameters -OutputPath $outputPath -Strict -CompletenessReportPath $reportPath -ErrorAction Stop } |
+            Should -Throw '*collection is incomplete: Export-AzDevOpsProject.*'
+
+        (Get-Content -Raw $reportPath | ConvertFrom-Json).Status | Should -Be 'Partial'
+    }
+
     It 'keeps exception credentials out of aggregate error diagnostics' {
         Mock -ModuleName PSRule.Rules.AzureDevOps Export-AzDevOpsProject { throw 'Bearer fixture-secret' }
 
