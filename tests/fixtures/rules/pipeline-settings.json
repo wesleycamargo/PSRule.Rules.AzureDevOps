@@ -1,0 +1,35 @@
+{
+  "Rule": "Azure.DevOps.Pipelines.Settings.LimitSetVariablesAtQueueTime",
+  "Cases": [
+    {
+      "Outcome": "Pass",
+      "Target": {
+        "ObjectType": "Azure.DevOps.Pipelines.Settings",
+        "ObjectName": "fixture.pipeline-settings.pass",
+        "enforceSettableVar": true
+      }
+    },
+    {
+      "Outcome": "Fail",
+      "Target": {
+        "ObjectType": "Azure.DevOps.Pipelines.Settings",
+        "ObjectName": "fixture.pipeline-settings.fail",
+        "enforceSettableVar": false
+      }
+    },
+    {
+      "Outcome": "Fail",
+      "Target": {
+        "ObjectType": "Azure.DevOps.Pipelines.Settings",
+        "ObjectName": "fixture.pipeline-settings.missing"
+      }
+    },
+    {
+      "Outcome": "None",
+      "Target": {
+        "ObjectType": "Fixture.Unrelated",
+        "ObjectName": "fixture.pipeline-settings.inapplicable"
+      }
+    }
+  ]
+}

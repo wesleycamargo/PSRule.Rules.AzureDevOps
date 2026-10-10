@@ -1,0 +1,43 @@
+{
+  "Rule": "Azure.DevOps.RetentionSettings.ArtifactMinimumRetentionDays",
+  "Cases": [
+    {
+      "Outcome": "Pass",
+      "Target": {
+        "ObjectType": "Azure.DevOps.RetentionSettings",
+        "ObjectName": "fixture.retention.pass",
+        "RetentionSettings": {
+          "purgeArtifacts": {
+            "value": 7
+          }
+        }
+      }
+    },
+    {
+      "Outcome": "Fail",
+      "Target": {
+        "ObjectType": "Azure.DevOps.RetentionSettings",
+        "ObjectName": "fixture.retention.fail",
+        "RetentionSettings": {
+          "purgeArtifacts": {
+            "value": 6
+          }
+        }
+      }
+    },
+    {
+      "Outcome": "Fail",
+      "Target": {
+        "ObjectType": "Azure.DevOps.RetentionSettings",
+        "ObjectName": "fixture.retention.missing"
+      }
+    },
+    {
+      "Outcome": "None",
+      "Target": {
+        "ObjectType": "Fixture.Unrelated",
+        "ObjectName": "fixture.retention.inapplicable"
+      }
+    }
+  ]
+}

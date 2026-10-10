@@ -1,0 +1,35 @@
+{
+  "Rule": "Azure.DevOps.Pipelines.Environments.Description",
+  "Cases": [
+    {
+      "Outcome": "Pass",
+      "Target": {
+        "ObjectType": "Azure.DevOps.Pipelines.Environment",
+        "ObjectName": "fixture.environment.pass",
+        "description": "Synthetic fixture for offline evaluation."
+      }
+    },
+    {
+      "Outcome": "Fail",
+      "Target": {
+        "ObjectType": "Azure.DevOps.Pipelines.Environment",
+        "ObjectName": "fixture.environment.fail",
+        "description": ""
+      }
+    },
+    {
+      "Outcome": "Fail",
+      "Target": {
+        "ObjectType": "Azure.DevOps.Pipelines.Environment",
+        "ObjectName": "fixture.environment.missing"
+      }
+    },
+    {
+      "Outcome": "None",
+      "Target": {
+        "ObjectType": "Fixture.Unrelated",
+        "ObjectName": "fixture.environment.inapplicable"
+      }
+    }
+  ]
+}

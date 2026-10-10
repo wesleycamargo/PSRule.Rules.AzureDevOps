@@ -1,0 +1,35 @@
+{
+  "Rule": "Azure.DevOps.ServiceConnections.Description",
+  "Cases": [
+    {
+      "Outcome": "Pass",
+      "Target": {
+        "ObjectType": "Azure.DevOps.ServiceConnection",
+        "ObjectName": "fixture.service-connection.pass",
+        "description": "Synthetic fixture for offline evaluation."
+      }
+    },
+    {
+      "Outcome": "Fail",
+      "Target": {
+        "ObjectType": "Azure.DevOps.ServiceConnection",
+        "ObjectName": "fixture.service-connection.fail",
+        "description": ""
+      }
+    },
+    {
+      "Outcome": "Fail",
+      "Target": {
+        "ObjectType": "Azure.DevOps.ServiceConnection",
+        "ObjectName": "fixture.service-connection.missing"
+      }
+    },
+    {
+      "Outcome": "None",
+      "Target": {
+        "ObjectType": "Fixture.Unrelated",
+        "ObjectName": "fixture.service-connection.inapplicable"
+      }
+    }
+  ]
+}

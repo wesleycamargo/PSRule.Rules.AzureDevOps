@@ -1,0 +1,39 @@
+{
+  "Rule": "Azure.DevOps.Repos.Branch.HasBranchPolicy",
+  "Cases": [
+    {
+      "Outcome": "Pass",
+      "Target": {
+        "ObjectType": "Azure.DevOps.Repo.Branch",
+        "ObjectName": "fixture.branch.pass",
+        "BranchPolicy": [
+          {
+            "isEnabled": true
+          }
+        ]
+      }
+    },
+    {
+      "Outcome": "Fail",
+      "Target": {
+        "ObjectType": "Azure.DevOps.Repo.Branch",
+        "ObjectName": "fixture.branch.fail",
+        "BranchPolicy": null
+      }
+    },
+    {
+      "Outcome": "Fail",
+      "Target": {
+        "ObjectType": "Azure.DevOps.Repo.Branch",
+        "ObjectName": "fixture.branch.missing"
+      }
+    },
+    {
+      "Outcome": "None",
+      "Target": {
+        "ObjectType": "Fixture.Unrelated",
+        "ObjectName": "fixture.branch.inapplicable"
+      }
+    }
+  ]
+}

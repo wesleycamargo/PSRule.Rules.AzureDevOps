@@ -1,0 +1,42 @@
+BeforeDiscovery {
+    $fixtures = @(Get-ChildItem "$PSScriptRoot/fixtures/rules" -Filter '*.json' -File | ForEach-Object {
+        @{ FixtureName = $_.BaseName; FixturePath = $_.FullName }
+    })
+    if ($fixtures.Count -eq 0) { throw 'Synthetic rule fixtures are required.' }
+}
+
+BeforeAll {
+    Import-Module "$PSScriptRoot/../src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1" -Force
+}
+
+Describe 'Assessment with synthetic rule fixtures' -Tag 'Unit' {
+    BeforeEach {
+        Mock Invoke-RestMethod { throw 'Offline rule evaluation attempted a live API request.' }
+        Mock Invoke-WebRequest { throw 'Offline rule evaluation attempted a live API request.' }
+        Mock -ModuleName PSRule.Rules.AzureDevOps Invoke-RestMethod { throw 'Offline rule evaluation attempted a live API request.' }
+        Mock -ModuleName PSRule.Rules.AzureDevOps Invoke-WebRequest { throw 'Offline rule evaluation attempted a live API request.' }
+    }
+
+    It 'evaluates passing, failing, missing-field and inapplicable <FixtureName> targets' -ForEach $fixtures {
+        $fixture = Get-Content $FixturePath -Raw | ConvertFrom-Json
+        $fixture.Cases.Count | Should -Be 4
+        $results = @($fixture.Cases.Target | Invoke-PSRule -Module PSRule.Rules.AzureDevOps -Name $fixture.Rule -Culture en)
+        $results.Count | Should -Be 3
+
+        foreach ($case in $fixture.Cases) {
+            $targetName = "$($case.Target.ObjectType)/$($case.Target.ObjectName)"
+            $hits = @($results | Where-Object TargetName -EQ $targetName)
+            if ($case.Outcome -eq 'None') {
+                $hits.Count | Should -Be 0
+            }
+            else {
+                $hits.Count | Should -Be 1
+                $hits[0].Outcome | Should -Be $case.Outcome
+            }
+        }
+        Should -Invoke Invoke-RestMethod -Times 0 -Exactly
+        Should -Invoke Invoke-WebRequest -Times 0 -Exactly
+        Should -Invoke -ModuleName PSRule.Rules.AzureDevOps Invoke-RestMethod -Times 0 -Exactly
+        Should -Invoke -ModuleName PSRule.Rules.AzureDevOps Invoke-WebRequest -Times 0 -Exactly
+    }
+}

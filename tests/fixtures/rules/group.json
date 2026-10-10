@@ -1,0 +1,49 @@
+{
+  "Rule": "Azure.DevOps.Groups.ProjectAdmins.MinMembers",
+  "Cases": [
+    {
+      "Outcome": "Pass",
+      "Target": {
+        "ObjectType": "Azure.DevOps.Group",
+        "ObjectName": "fixture.group.pass",
+        "displayName": "Project Administrators",
+        "Members": [
+          {
+            "descriptor": "fixture-member-a"
+          },
+          {
+            "descriptor": "fixture-member-b"
+          }
+        ]
+      }
+    },
+    {
+      "Outcome": "Fail",
+      "Target": {
+        "ObjectType": "Azure.DevOps.Group",
+        "ObjectName": "fixture.group.fail",
+        "displayName": "Project Administrators",
+        "Members": [
+          {
+            "descriptor": "fixture-member-a"
+          }
+        ]
+      }
+    },
+    {
+      "Outcome": "Fail",
+      "Target": {
+        "ObjectType": "Azure.DevOps.Group",
+        "ObjectName": "fixture.group.missing",
+        "displayName": "Project Administrators"
+      }
+    },
+    {
+      "Outcome": "None",
+      "Target": {
+        "ObjectType": "Fixture.Unrelated",
+        "ObjectName": "fixture.group.inapplicable"
+      }
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "Rule": "Azure.DevOps.Project.Visibility",
+  "Cases": [
+    {
+      "Outcome": "Pass",
+      "Target": {
+        "ObjectType": "Azure.DevOps.Project",
+        "ObjectName": "fixture.project.pass",
+        "visibility": "private"
+      }
+    },
+    {
+      "Outcome": "Fail",
+      "Target": {
+        "ObjectType": "Azure.DevOps.Project",
+        "ObjectName": "fixture.project.fail",
+        "visibility": "public"
+      }
+    },
+    {
+      "Outcome": "Fail",
+      "Target": {
+        "ObjectType": "Azure.DevOps.Project",
+        "ObjectName": "fixture.project.missing"
+      }
+    },
+    {
+      "Outcome": "None",
+      "Target": {
+        "ObjectType": "Fixture.Unrelated",
+        "ObjectName": "fixture.project.inapplicable"
+      }
+    }
+  ]
+}

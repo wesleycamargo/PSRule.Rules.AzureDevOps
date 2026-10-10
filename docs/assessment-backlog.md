@@ -1,6 +1,6 @@
 # Assessment tool improvement backlog
 
-Review date: 2026-10-09. Status: ADO-001 and ADO-011 are **Completed**, ADO-010 is **In progress**; other items are **Proposed**.
+Review date: 2026-10-09. Status: ADO-001, ADO-002, and ADO-011 are **Completed**, ADO-010 is **In progress**; other items are **Proposed**.
 
 This backlog records improvements from a source review of the assessment tool.
 It covers assessment reliability, rule correctness, authentication, API collection,
@@ -19,7 +19,7 @@ correctness and reliability, and P2 improves reproducibility and usability.
 | ID | Priority | Improvement | Dependencies | Status |
 | --- | --- | --- | --- | --- |
 | ADO-001 | P0 | Make assessment completeness explicit | None | Completed |
-| ADO-002 | P1 | Establish deterministic assessment tests | None | Proposed |
+| ADO-002 | P1 | Establish deterministic assessment tests | None | Completed |
 | ADO-003 | P1 | Correct production rule applicability | ADO-002 | Proposed |
 | ADO-004 | P1 | Improve secret detection precision | ADO-002 | Proposed |
 | ADO-005 | P1 | Verify API collection completeness and resilience | ADO-001, ADO-002 | Proposed |
@@ -94,7 +94,20 @@ collection diagnostics.
 
 ## ADO-002 — Establish deterministic assessment tests
 
-**Priority:** P1. **Status:** Proposed. **Dependencies:** None.
+**Priority:** P1. **Status:** Completed. **Dependencies:** None.
+
+**Completed 2026-10-10:** Implemented on `test/ado-002-deterministic-assessment`.
+Synthetic fixtures exercise 52 passing, failing, missing-field, and inapplicable
+cases across 13 rule families through PSRule. Live rule files collect independently
+in Pester's `TestDrive`, with explicit prerequisite errors. Module CI selects `Unit`
+without Azure credentials; `Integration` and `Authentication` remain separate.
+See [testing guidance](testing.md).
+Validation: 84 offline Unit tests passed with all `ADO_*` variables removed, no saved
+exports, Azure CLI disabled, and zero unmocked HTTP requests. A standalone legacy
+rule file passed nine tests against synthetic API responses. Independent review
+passed all 17 new fixture and helper tests and found no remaining blockers.
+PowerShell and workflow parsing and `git diff --check` passed. Exhaustive coverage
+of all 119 rules remains ADO-012; live API compatibility remains separate.
 
 **Problem and evidence:** Confirmed: [connection tests](../tests/Common.Tests.ps1)
 use live Azure DevOps, and [rule tests](../tests/Rules.ServiceConnections.Tests.ps1)
@@ -464,7 +477,7 @@ coverage inventory separately from function/class code coverage under ADO-008.
 
 ## Delivery order and completion
 
-ADO-001 and ADO-011 are complete. Continue ADO-002 and remaining test setup/contracts
+ADO-001, ADO-002, and ADO-011 are complete. Continue remaining test setup/contracts
 (ADO-010), and prioritize ADO-008's confirmed CI failure propagation gap.
 Then address rule correctness, rule coverage, and collection reliability.
 Complete CI and user guidance after their dependencies. Implement each item in a

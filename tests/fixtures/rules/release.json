@@ -1,0 +1,61 @@
+{
+  "Rule": "Azure.DevOps.Pipelines.Releases.Definition.ProductionApproval",
+  "Cases": [
+    {
+      "Outcome": "Pass",
+      "Target": {
+        "ObjectType": "Azure.DevOps.Pipelines.Releases.Definition",
+        "ObjectName": "fixture.release.pass",
+        "environments": [
+          {
+            "name": "production",
+            "preDeployApprovals": {
+              "approvals": [
+                {
+                  "approver": {
+                    "displayName": "Fixture reviewer"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Outcome": "Fail",
+      "Target": {
+        "ObjectType": "Azure.DevOps.Pipelines.Releases.Definition",
+        "ObjectName": "fixture.release.fail",
+        "environments": [
+          {
+            "name": "production",
+            "preDeployApprovals": {
+              "approvals": []
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Outcome": "Fail",
+      "Target": {
+        "ObjectType": "Azure.DevOps.Pipelines.Releases.Definition",
+        "ObjectName": "fixture.release.missing",
+        "environments": [
+          {
+            "name": "production",
+            "preDeployApprovals": {}
+          }
+        ]
+      }
+    },
+    {
+      "Outcome": "None",
+      "Target": {
+        "ObjectType": "Fixture.Unrelated",
+        "ObjectName": "fixture.release.inapplicable"
+      }
+    }
+  ]
+}

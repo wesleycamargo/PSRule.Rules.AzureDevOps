@@ -1,0 +1,35 @@
+{
+  "Rule": "Azure.DevOps.Tasks.VariableGroup.Description",
+  "Cases": [
+    {
+      "Outcome": "Pass",
+      "Target": {
+        "ObjectType": "Azure.DevOps.Tasks.VariableGroup",
+        "ObjectName": "fixture.variable-group.pass",
+        "description": "Synthetic fixture for offline evaluation."
+      }
+    },
+    {
+      "Outcome": "Fail",
+      "Target": {
+        "ObjectType": "Azure.DevOps.Tasks.VariableGroup",
+        "ObjectName": "fixture.variable-group.fail",
+        "description": ""
+      }
+    },
+    {
+      "Outcome": "Fail",
+      "Target": {
+        "ObjectType": "Azure.DevOps.Tasks.VariableGroup",
+        "ObjectName": "fixture.variable-group.missing"
+      }
+    },
+    {
+      "Outcome": "None",
+      "Target": {
+        "ObjectType": "Fixture.Unrelated",
+        "ObjectName": "fixture.variable-group.inapplicable"
+      }
+    }
+  ]
+}

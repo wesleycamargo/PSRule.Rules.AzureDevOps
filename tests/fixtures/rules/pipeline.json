@@ -1,0 +1,39 @@
+{
+  "Rule": "Azure.DevOps.Pipelines.Core.UseYamlDefinition",
+  "Cases": [
+    {
+      "Outcome": "Pass",
+      "Target": {
+        "ObjectType": "Azure.DevOps.Pipeline",
+        "ObjectName": "fixture.pipeline.pass",
+        "configuration": {
+          "type": "yaml"
+        }
+      }
+    },
+    {
+      "Outcome": "Fail",
+      "Target": {
+        "ObjectType": "Azure.DevOps.Pipeline",
+        "ObjectName": "fixture.pipeline.fail",
+        "configuration": {
+          "type": "designer"
+        }
+      }
+    },
+    {
+      "Outcome": "Fail",
+      "Target": {
+        "ObjectType": "Azure.DevOps.Pipeline",
+        "ObjectName": "fixture.pipeline.missing"
+      }
+    },
+    {
+      "Outcome": "None",
+      "Target": {
+        "ObjectType": "Fixture.Unrelated",
+        "ObjectName": "fixture.pipeline.inapplicable"
+      }
+    }
+  ]
+}

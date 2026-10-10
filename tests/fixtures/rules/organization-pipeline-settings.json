@@ -1,0 +1,35 @@
+{
+  "Rule": "Azure.DevOps.Organization.Pipelines.Settings.DisableAnonymousBadgeAccess",
+  "Cases": [
+    {
+      "Outcome": "Pass",
+      "Target": {
+        "ObjectType": "Azure.DevOps.Organization.Pipelines.Settings",
+        "ObjectName": "fixture.organization-pipeline-settings.pass",
+        "statusBadgesArePrivate": true
+      }
+    },
+    {
+      "Outcome": "Fail",
+      "Target": {
+        "ObjectType": "Azure.DevOps.Organization.Pipelines.Settings",
+        "ObjectName": "fixture.organization-pipeline-settings.fail",
+        "statusBadgesArePrivate": false
+      }
+    },
+    {
+      "Outcome": "Fail",
+      "Target": {
+        "ObjectType": "Azure.DevOps.Organization.Pipelines.Settings",
+        "ObjectName": "fixture.organization-pipeline-settings.missing"
+      }
+    },
+    {
+      "Outcome": "None",
+      "Target": {
+        "ObjectType": "Fixture.Unrelated",
+        "ObjectName": "fixture.organization-pipeline-settings.inapplicable"
+      }
+    }
+  ]
+}

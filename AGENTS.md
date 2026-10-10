@@ -25,7 +25,7 @@ Add Pester tests for every rule and function; rule tests must cover passing and 
 
 Tag tests `Unit` (offline, no credentials), `Integration` (live Azure DevOps data), or `Authentication` (live `Connect-AzDevOps` modes, in `tests/Authentication.Tests.ps1`). For live runs, `Run-Tests.ps1` fills any unset `ADO_*` variable: organization `ai-experiments`, project `PSRule.Rules.AzureDevOps.Tests` (override with `-Organization`/`-Project`), export directory `tests/outExport`, and all PAT and access-token variables from the `az login` token. Service principal tests need `ADO_CLIENT_ID`, `ADO_CLIENT_SECRET`, and `ADO_TENANT_ID`; managed identity tests only run on Azure-hosted agents.
 
-Integration tests expect the resources created by `tests/Initialize-IntegrationTestData.ps1 -Organization <org> -Project <project>`, which is idempotent. Resolve test resources by name, never by fixed ID or list position. Rule tests read the exports that `Rules.Common.Tests.ps1` writes to `tests/out*`. See `docs/test-repair-phases.md` for known external blockers.
+Integration tests expect the resources created by `tests/Initialize-IntegrationTestData.ps1 -Organization <org> -Project <project>`, which is idempotent. Resolve test resources by name, never by fixed ID or list position. Each live rule test file creates its own exports in Pester's `TestDrive`. See `docs/testing.md` for test selections and prerequisites, and `docs/test-repair-phases.md` for known external blockers.
 
 ## Commit & Pull Request Guidelines
 

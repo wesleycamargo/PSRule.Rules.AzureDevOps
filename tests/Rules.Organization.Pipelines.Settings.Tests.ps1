@@ -13,18 +13,11 @@ BeforeAll {
 
     Write-Verbose "Loading module from $ourModule"
     Import-Module -Name $ourModule -Force -ErrorAction Stop
-    $here = (Resolve-Path $PSScriptRoot).Path
-
-    # Get temporary test output folders and store paths
-    $outPath = Get-Item -Path (Join-Path -Path $here -ChildPath 'out') -ErrorAction SilentlyContinue
-    if (-not $outPath) { throw "Directory 'out' not found in $here" }
-    $outPath = $outPath.FullName
-    $outPathReadOnly = Get-Item -Path (Join-Path -Path $here -ChildPath 'outReadOnly') -ErrorAction SilentlyContinue
-    if (-not $outPathReadOnly) { throw "Directory 'outReadOnly' not found in $here" }
-    $outPathReadOnly = $outPathReadOnly.FullName
-    $outPathFineGrained = Get-Item -Path (Join-Path -Path $here -ChildPath 'outFineGrained') -ErrorAction SilentlyContinue
-    if (-not $outPathFineGrained) { throw "Directory 'outFineGrained' not found in $here" }
-    $outPathFineGrained = $outPathFineGrained.FullName
+    . "$PSScriptRoot/helpers/LiveRuleTestData.ps1"
+    $paths = New-LiveRuleTestData -ExportCommand Export-AdoOrganizationPipelinesSettings -OutputPath (Join-Path $TestDrive 'exports')
+    $outPath = $paths.FullAccess
+    $outPathReadOnly = $paths.ReadOnly
+    $outPathFineGrained = $paths.FineGrained
 
     # Verify OrganizationpipelineSettings.ado.json exists in each directory
     $jsonFile = 'OrganizationpipelineSettings.ado.json'

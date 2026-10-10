@@ -13,25 +13,20 @@ BeforeAll {
     $ourModule = (Join-Path -Path $rootPath -ChildPath 'src/PSRule.Rules.AzureDevOps')
 
     Import-Module -Name $ourModule -Force
-    $here = (Resolve-Path $PSScriptRoot).Path
+    . "$PSScriptRoot/helpers/LiveRuleTestData.ps1"
+    $paths = New-LiveRuleTestData -ExportCommand Export-AzDevOpsVariableGroups -OutputPath (Join-Path $TestDrive 'exports')
+    $outPath = $paths.FullAccess
+    $outPathReadOnly = $paths.ReadOnly
+    $outPathFineGrained = $paths.FineGrained
 
-    # Get tempory test output folder and store path
-    $outPath = Get-Item -Path (Join-Path -Path $here -ChildPath 'out')
-    $outPath = $outPath.FullName
     
     # Run rules with default token type
     $ruleResult = Invoke-PSRule -InputPath "$($outPath)/" -Module PSRule.Rules.AzureDevOps -Format Detect -Culture en
 
-    # Get temporary test output folder for tests with the ReadOnly TokenType
-    $outPathReadOnly = Get-Item -Path (Join-Path -Path $here -ChildPath 'outReadOnly')
-    $outPathReadOnly = $outPathReadOnly.FullName
 
     # Run rules with ReadOnly token type
     $ruleResultReadOnly = Invoke-PSRule -InputPath "$($outPathReadOnly)/" -Module PSRule.Rules.AzureDevOps -Format Detect -Culture en
 
-    # Get temporary test output folder for tests with the FineGrained TokenType
-    $outPathFineGrained = Get-Item -Path (Join-Path -Path $here -ChildPath 'outFineGrained')
-    $outPathFineGrained = $outPathFineGrained.FullName
 
     # Run rules with FineGrained token type
     $ruleResultFineGrained = Invoke-PSRule -InputPath "$($outPathFineGrained)/" -Module PSRule.Rules.AzureDevOps -Format Detect -Culture en

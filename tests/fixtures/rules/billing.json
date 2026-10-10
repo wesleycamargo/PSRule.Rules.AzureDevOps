@@ -1,0 +1,35 @@
+{
+  "Rule": "Azure.DevOps.Organization.GeneralBillingSettings.SubscriptionActive",
+  "Cases": [
+    {
+      "Outcome": "Pass",
+      "Target": {
+        "ObjectType": "Azure.DevOps.Organization.GeneralBillingSettings",
+        "ObjectName": "fixture.billing.pass",
+        "subscriptionStatus": "active"
+      }
+    },
+    {
+      "Outcome": "Fail",
+      "Target": {
+        "ObjectType": "Azure.DevOps.Organization.GeneralBillingSettings",
+        "ObjectName": "fixture.billing.fail",
+        "subscriptionStatus": "disabled"
+      }
+    },
+    {
+      "Outcome": "Fail",
+      "Target": {
+        "ObjectType": "Azure.DevOps.Organization.GeneralBillingSettings",
+        "ObjectName": "fixture.billing.missing"
+      }
+    },
+    {
+      "Outcome": "None",
+      "Target": {
+        "ObjectType": "Fixture.Unrelated",
+        "ObjectName": "fixture.billing.inapplicable"
+      }
+    }
+  ]
+}
