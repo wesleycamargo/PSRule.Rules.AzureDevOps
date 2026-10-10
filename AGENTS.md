@@ -29,6 +29,8 @@ Integration tests expect the resources created by `tests/Initialize-IntegrationT
 
 ## Commit & Pull Request Guidelines
 
+Always create Git worktrees under `.worktrees/<task-name>/` in the primary repository checkout. When creating a worktree from another worktree, use the primary checkout's `.worktrees/` directory.
+
 Recent history uses descriptive subjects, often with PR numbers. `CONTRIBUTING.md` explicitly prefers Conventional Commits, for example `fix: handle uninitialized repositories`.
 
 Fork the repository, create a focused branch, and submit a PR with the behavior change, related issues, and validation results. Ensure tests pass before submission. Follow `CODE_OF_CONDUCT.md`; keep credentials and sensitive export data out of commits.

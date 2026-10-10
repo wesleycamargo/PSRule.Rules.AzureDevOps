@@ -4,6 +4,7 @@ coverage.xml
 myenv.ps1
 .report/
 .local/
+/.worktrees/
 
 
 # VS Code files for those working on multiple tools
