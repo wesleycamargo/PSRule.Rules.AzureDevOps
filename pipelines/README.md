@@ -25,13 +25,19 @@ It uses the protected Library variable group `ai-credentials`.
    variable group. The pipeline sets `ADO_ORGANIZATION` to `ai-experiments`
    and `ADO_ORGANIZATION_ID` to `3b022c28-683d-4d7e-87a5-bd8198332011`.
 
-The pipeline installs PSRule 2.9.0, imports the checked-out module, exports
-the organization data to the agent workspace, and evaluates
-`Baseline.Default`. It stores only `psrule-results.sarif` as the
-`psrule-results` artifact; exported Azure DevOps data is not published.
+The pipeline installs PSRule 2.9.0, imports the checked-out module, and exports
+the organization data to a fresh agent temporary directory for each run.
+It uses strict collection completeness checks before evaluating
+`Baseline.Default`. The `psrule-results` artifact contains
+`collection-status.json` and, when evaluation runs, `psrule-results.sarif`;
+exported Azure DevOps data is not published. Report publication runs even
+when collection fails.
 
 Rule violations are reported in the SARIF artifact and the job log but do not
-fail the pipeline. Authentication, export, and execution errors fail the run.
+fail the pipeline. Incomplete collection fails the run after writing the
+completeness report and prevents rule evaluation. Authentication, export,
+and execution errors also fail the run. See
+[assessment completeness](../docs/assessment-completeness.md) for report details.
 Open the artifact with the Azure DevOps SARIF Viewer extension if installed.
 
 The pipeline uses the project self-hosted `AI-Pool` rather than Microsoft-hosted

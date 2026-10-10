@@ -61,10 +61,12 @@ steps:
       pwsh: true
       script: |
         $ErrorActionPreference = 'Stop'
-        $exportPath = Join-Path $env:PIPELINE_WORKSPACE 'psrule-export'
+        $exportPath = Join-Path $env:AGENT_TEMPDIRECTORY ('psrule-export-' + [guid]::NewGuid().ToString())
         $reportPath = Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'psrule-results.sarif'
+        $completenessPath = Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'collection-status.json'
 
         New-Item -Path $exportPath -ItemType Directory -Force | Out-Null
+        New-Item -Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY -ItemType Directory -Force | Out-Null
         $moduleManifest = Join-Path $env:BUILD_SOURCESDIRECTORY 'src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1'
         Import-Module $moduleManifest -Force
 
@@ -89,7 +91,9 @@ steps:
         Export-AzDevOpsOrganizationRuleData `
             -Organization $env:ADO_ORGANIZATION `
             -OrganizationId $env:ADO_ORGANIZATION_ID `
-            -OutputPath $exportPath
+            -OutputPath $exportPath `
+            -CompletenessReportPath $completenessPath `
+            -Strict
 
         $null = Assert-PSRule `
             -InputPath $exportPath `
@@ -110,7 +114,7 @@ steps:
       ADO_CLIENT_SECRET: $(ADO_CLIENT_SECRET)
 
   - task: PublishBuildArtifacts@1
-    displayName: Publish PSRule SARIF report
+    displayName: Publish PSRule assessment reports
     condition: always()
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)
