@@ -38,6 +38,9 @@ to Azure Monitor.
 
 ## Usage
 
+See [repository architecture](docs/architecture.md) for module boundaries, data contracts,
+pipeline structure, and architecture decision records.
+
 Use [assessment collection completeness](docs/assessment-completeness.md) to check
 collection coverage before evaluating rules, including strict exports and separate
 JSON completeness reports.
