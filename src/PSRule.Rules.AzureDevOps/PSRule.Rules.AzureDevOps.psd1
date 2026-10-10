@@ -12,7 +12,7 @@
     RootModule           = 'PSRule.Rules.AzureDevOps.psm1'
 
     # Version number of this module.
-    ModuleVersion        = '0.5.11'
+    ModuleVersion        = '0.5.12'
 
     # Supported PSEditions
     CompatiblePSEditions = @('Core', 'Desktop')
@@ -108,10 +108,10 @@
             Tags                       = @('PSRule-rules', 'PSRule', 'AzureDevOps', 'Security')
 
             # A URL to the license for this module.
-            LicenseUri                 = 'https://github.com/thecloudexplorers/PSRule.Rules.AzureDevOps/blob/main/LICENSE'
+            LicenseUri                 = 'https://github.com/wesleycamargo/PSRule.Rules.AzureDevOps/blob/main/LICENSE'
 
             # A URL to the main website for this project.
-            ProjectUri                 = 'https://github.com/thecloudexplorers/PSRule.Rules.AzureDevOps'
+            ProjectUri                 = 'https://github.com/wesleycamargo/PSRule.Rules.AzureDevOps'
 
             # A URL to an icon representing this module.
             # IconUri = ''
@@ -133,7 +133,7 @@
     } # End of PrivateData hashtable
 
     # HelpInfo URI of this module
-    HelpInfoURI          = 'https://github.com/thecloudexplorers/PSRule.Rules.AzureDevOps/wiki'
+    HelpInfoURI          = 'https://github.com/wesleycamargo/PSRule.Rules.AzureDevOps/wiki'
 
     # Default prefix for commands exported from this module. Override the default prefix using Import-Module -Prefix.
     # DefaultCommandPrefix = ''

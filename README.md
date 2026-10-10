@@ -59,6 +59,8 @@ from the PowerShell Gallery:
 Install-Module -Name PSRule.Rules.AzureDevOps -Scope CurrentUser
 ```
 
+For the version published from this repository, use the [GitHub release installation instructions](docs/releases.md).
+
 ### PAT Token
 
 Once you have both modules installed, you can connect to your
